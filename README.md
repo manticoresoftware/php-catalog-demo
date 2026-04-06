@@ -1,6 +1,6 @@
 # Demo: Catalog App Built With Manticore PHP Client 
 
-**Publicly available demo - [catalog-app.manticoresearch.com](https://catalog-app.manticoresearch.com/)**
+**Publicly available demo - [catalog.manticoresearch.com](https://catalog.manticoresearch.com/)**
 
 [Blogpost about this project](https://manticoresearch.com/blog/manticore-php-demo/)
 
