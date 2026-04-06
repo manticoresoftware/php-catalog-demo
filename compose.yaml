@@ -1,0 +1,10 @@
+services:
+  manticore:
+    image: manticoresearch/manticore:latest
+    ports:
+      - "9306:9306"
+      - "9308:9308"
+    volumes:
+      - manticore_data:/var/lib/manticore
+volumes:
+  manticore_data:

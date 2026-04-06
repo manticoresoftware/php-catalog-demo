@@ -1,0 +1,7 @@
+.DS_Store
+.env
+
+app/vendor/
+app/storage/logs/*.log
+app/public/images/uploads/*
+fixtures/output/*

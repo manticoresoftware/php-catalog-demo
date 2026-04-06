@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Catalog Admin – Items</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --surface: #fff;
+            --text: #1f2d3d;
+            --muted: #6f8398;
+            --border: #d3deeb;
+            --accent-soft: #edf6e8;
+            --accent-strong: #3f7d23;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        main.shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 1rem 1rem 1.25rem;
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 0.72rem;
+            background: var(--surface);
+            padding: 0.46rem 0.72rem;
+        }
+
+        .brand {
+            margin: 0;
+            font-weight: 700;
+            color: #344f6e;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+        }
+
+        .crumb {
+            color: var(--muted);
+            font-size: 0.86rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .topnav {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-self: end;
+        }
+
+        .topnav a {
+            text-decoration: none;
+            color: #3c526d;
+            padding: 0.34rem 0.62rem;
+            border: 1px solid var(--border);
+            border-radius: 0.48rem;
+            background: #fff;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+        }
+
+        .topnav a:hover {
+            background: #f1f5fa;
+            border-color: #c9d5e3;
+        }
+
+        .topnav a[aria-current="page"] {
+            background: var(--accent-soft);
+            border-color: #bad8a6;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        h1 {
+            margin: 0 0 0.72rem;
+            font-size: 1.28rem;
+            color: #2e4663;
+        }
+
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.78rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-card h3 {
+            margin: 0 0 0.62rem;
+            font-size: 1rem;
+            color: #2f4a69;
+        }
+
+        .form-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-card-head h3 {
+            margin: 0;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select,
+        textarea {
+            min-height: 1.75rem;
+            height: 1.75rem;
+            padding: 0.18rem 0.46rem;
+            font-size: 0.8rem;
+            border-radius: 0.42rem;
+        }
+
+        textarea {
+            height: auto;
+            min-height: 4.5rem;
+        }
+
+        input[type="file"]::file-selector-button {
+            min-height: 1.55rem;
+            height: 1.55rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 0.42rem;
+            border: 1px solid #c9d5e3;
+            background: #f7faff;
+            color: #3f5a7a;
+            font-size: 0.78rem;
+            margin-right: 0.42rem;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            min-height: 1.55rem;
+            height: 1.55rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 0.42rem;
+            border: 1px solid #c9d5e3;
+            background: #f7faff;
+            color: #3f5a7a;
+            font-size: 0.78rem;
+            margin-right: 0.42rem;
+        }
+
+        .flash { margin-bottom: 0.7rem; padding: 0.62rem 0.72rem; border-radius: 0.56rem; font-size: 0.84rem; }
+        .flash.success { background: #e8f4e2; color: #2d642f; border: 1px solid #c8dfb9; }
+        .flash.error { background: #fdecea; color: #5c2c2c; border: 1px solid #efc8c2; }
+
+        table { width: 100%; font-size: 0.84rem; border-collapse: collapse; }
+        table th, table td { border-bottom: 1px solid #e3ebf4; padding: 0.44rem 0.36rem; vertical-align: top; }
+        table th { color: #6f859f; font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        table tbody tr:hover { background: #f8fbff; }
+        table th a {
+            color: inherit;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.28rem;
+        }
+        table th a:hover {
+            text-decoration: none;
+        }
+        .sort-caret {
+            display: inline-flex;
+            flex-direction: column;
+            line-height: 0.72;
+            font-size: 0.72rem;
+            letter-spacing: 0;
+        }
+        .sort-caret span {
+            color: #9aa9bb;
+            font-weight: 700;
+        }
+        .sort-caret span.active {
+            color: #2f4a69;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: .4rem;
+        }
+
+        .item-actions a[role="button"] {
+            margin: 0;
+            padding: 0.24rem 0.6rem;
+        }
+
+        .item-actions form {
+            margin: 0;
+        }
+
+        .item-actions button {
+            margin: 0;
+            background: #b8322a;
+            border: none;
+            padding: 0.24rem 0.6rem;
+        }
+
+        .item-submit-btn {
+            min-height: 1.62rem !important;
+            height: auto !important;
+            padding: 0.14rem 0.5rem !important;
+            font-size: 0.78rem !important;
+            line-height: 1.15;
+        }
+
+        .item-actions .compact-action {
+            min-height: 1.62rem !important;
+            height: auto !important;
+            padding: 0.14rem 0.5rem !important;
+            font-size: 0.76rem !important;
+            line-height: 1.15;
+            border-radius: 0.44rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+        }
+
+        button,
+        a[role="button"] {
+            min-height: 1.75rem;
+            height: auto;
+            line-height: 1.2;
+            padding: 0.18rem 0.54rem;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+        }
+
+        .image-preview {
+            display:flex;
+            align-items:flex-start;
+            gap:.75rem;
+            margin-top:.25rem;
+        }
+
+        .image-preview img {
+            width:90px;
+            height:90px;
+            object-fit:cover;
+            border:1px solid #d8e2ef;
+            border-radius:6px;
+            background:#f5f5f5;
+        }
+
+        .image-preview small {
+            display:block;
+            color:#666;
+        }
+
+        .form-actions {
+            display:flex;
+            gap:.5rem;
+            align-items:center;
+        }
+
+        .close-edit-btn {
+            min-width: 1.62rem;
+            width: 1.62rem;
+            min-height: 1.62rem;
+            height: 1.62rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.96rem;
+            font-weight: 700;
+            line-height: 1;
+            border-radius: 0.44rem;
+            text-decoration: none;
+            background: transparent !important;
+            border: 0 !important;
+            color: #6c839f !important;
+            box-shadow: none !important;
+        }
+
+        .close-edit-btn:hover {
+            color: #365575 !important;
+            background: #eef4fa !important;
+        }
+
+        .pager {
+            display:flex;
+            gap:0.5rem;
+            align-items:center;
+            margin-top:0.5rem;
+            font-size:0.82rem;
+            color: var(--muted);
+        }
+
+        .pager a {
+            text-decoration:none;
+            color:#486582;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+        }
+
+        .pager a:hover {
+            text-decoration:underline;
+        }
+
+        .confirm-backdrop[hidden] {
+            display: none;
+        }
+
+        .confirm-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 35, 55, 0.34);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 1rem;
+        }
+
+        .confirm-modal {
+            width: min(420px, 100%);
+            background: #fff;
+            border: 1px solid #d3deeb;
+            border-radius: 0.72rem;
+            box-shadow: 0 18px 36px rgba(18, 36, 64, 0.18);
+            padding: 0.8rem;
+        }
+
+        .confirm-modal h4 {
+            margin: 0 0 0.35rem;
+            font-size: 0.98rem;
+            color: #2e4663;
+        }
+
+        .confirm-modal p {
+            margin: 0;
+            color: #536b86;
+            font-size: 0.84rem;
+        }
+
+        .confirm-actions {
+            margin-top: 0.72rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.42rem;
+        }
+
+        .confirm-actions button {
+            min-height: 1.75rem;
+            height: auto;
+            line-height: 1.2;
+            padding: 0.18rem 0.54rem;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+        }
+
+        .confirm-delete-btn {
+            background: #b8322a;
+            border: 0;
+            color: #fff;
+        }
+
+        .confirm-delete-btn:hover {
+            background: #a62e27;
+        }
+
+        @media (max-width: 900px) {
+            .topbar {
+                grid-template-columns: 1fr;
+                gap: 0.45rem;
+            }
+            .topnav {
+                justify-self: start;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <div class="topbar">
+        <p class="brand">Manticore Catalog Demo</p>
+        <div class="crumb">Admin Dashboard / Manage Items</div>
+        <div class="topnav">
+            <a href="/">Catalog</a>
+            <a href="/admin/upload">Admin Dashboard</a>
+            <a href="/admin/items" aria-current="page">Manage Items</a>
+        </div>
+    </div>
+
+    <h1>Catalog Items</h1>
+
+    {% if flash %}
+        <div class="flash {{ flash.type }}">{{ flash.message }}</div>
+    {% endif %}
+
+    <article class="section-card">
+        <div class="form-card-head">
+            <h3>{{ editing ? 'Edit Item #' ~ itemForm.id : 'Add New Item' }}</h3>
+            {% if editing %}
+                <a href="/admin/items?page={{ itemPage }}&sort={{ itemSort }}&dir={{ itemDir }}" class="close-edit-btn" aria-label="Close edit form" title="Close edit form">×</a>
+            {% endif %}
+        </div>
+        <form action="/admin/items/save" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="page" value="{{ itemPage }}">
+            <input type="hidden" name="sort" value="{{ itemSort }}">
+            <input type="hidden" name="dir" value="{{ itemDir }}">
+            {% if editing %}
+                <input type="hidden" name="id" value="{{ itemForm.id }}">
+            {% endif %}
+            <div class="grid">
+                <label>
+                    Title
+                    <input type="text" name="title" required value="{{ itemForm.title }}">
+                </label>
+                <label>
+                    Price
+                    <input type="number" step="any" min="0" name="price" value="{{ itemForm.price }}">
+                </label>
+                <label>
+                    Release Year
+                    <input type="number" min="1900" max="{{ "now"|date("Y") }}" name="release_year" value="{{ itemForm.release_year }}">
+                </label>
+            </div>
+            <div class="grid">
+                <label>
+                    Publisher
+                    <input type="text" name="publisher" value="{{ itemForm.publisher }}">
+                </label>
+                <label>
+                    Designer
+                    <input type="text" name="designer" value="{{ itemForm.designer }}">
+                </label>
+                <label>
+                    Image URL
+                    <input type="text" name="image_url" value="{{ itemForm.image_url }}">
+                </label>
+            </div>
+            <label>
+                Upload image (optional)
+                <input type="file" name="image_file" accept="image/*">
+            </label>
+            {% if editing and itemForm.image_url %}
+                <div class="image-preview">
+                    <img
+                        src="{{ itemForm.image_url }}"
+                        alt="{{ itemForm.title }}"
+                    >
+                    <div>
+                        <small>Current image</small>
+                        <a href="{{ itemForm.image_url }}" target="_blank" rel="noopener">{{ itemForm.image_url }}</a>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="grid">
+                <label>
+                    Min Players
+                    <input type="number" min="1" name="player_count_min" value="{{ itemForm.player_count_min }}">
+                </label>
+                <label>
+                    Max Players
+                    <input type="number" min="1" name="player_count_max" value="{{ itemForm.player_count_max }}">
+                </label>
+                <label>
+                    Play Time (minutes)
+                    <input type="number" min="1" name="play_time_minutes" value="{{ itemForm.play_time_minutes }}">
+                </label>
+            </div>
+            <label>
+                Categories (names, comma or pipe separated)
+                <input type="text" name="categories_text" value="{{ itemForm.categories_text }}">
+            </label>
+            <label>
+                Tags (names, comma or pipe separated)
+                <input type="text" name="tags_text" value="{{ itemForm.tags_text }}">
+            </label>
+            <label>
+                Description
+                <textarea name="description" rows="4">{{ itemForm.description }}</textarea>
+            </label>
+            <div class="form-actions">
+                <button type="submit" class="item-submit-btn">{{ editing ? 'Save Changes' : 'Add Item' }}</button>
+            </div>
+        </form>
+    </article>
+
+    <section class="section-card">
+    <h3>Existing Items</h3>
+    {% if items %}
+        {% set idNextDir = itemSort == 'id' and itemDir == 'asc' ? 'desc' : 'asc' %}
+        {% set createdNextDir = itemSort == 'created_at' and itemDir == 'asc' ? 'desc' : 'asc' %}
+        <table>
+            <thead>
+            <tr>
+                <th>
+                    <a href="/admin/items?page=1&sort=id&dir={{ idNextDir }}">
+                        ID
+                        <span class="sort-caret" aria-hidden="true">
+                            <span class="{{ itemSort == 'id' and itemDir == 'asc' ? 'active' : '' }}">▲</span>
+                            <span class="{{ itemSort == 'id' and itemDir == 'desc' ? 'active' : '' }}">▼</span>
+                        </span>
+                    </a>
+                </th>
+                <th>
+                    <a href="/admin/items?page=1&sort=created_at&dir={{ createdNextDir }}">
+                        Created
+                        <span class="sort-caret" aria-hidden="true">
+                            <span class="{{ itemSort == 'created_at' and itemDir == 'asc' ? 'active' : '' }}">▲</span>
+                            <span class="{{ itemSort == 'created_at' and itemDir == 'desc' ? 'active' : '' }}">▼</span>
+                        </span>
+                    </a>
+                </th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Year</th>
+                <th>Categories</th>
+                <th>Tags</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.created_at|date('Y-m-d H:i') }}</td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ '$' ~ item.price|number_format(2, '.', ',') }}</td>
+                    <td>{{ item.release_year }}</td>
+                    <td>{{ item.categories_text }}</td>
+                    <td>{{ item.tags_text }}</td>
+                    <td>
+                        <div class="item-actions">
+                        <a href="/admin/items?edit_id={{ item.id }}&page={{ itemPagination.page }}&sort={{ itemSort }}&dir={{ itemDir }}" role="button" class="secondary compact-action">Edit</a>
+                        <form action="/admin/items/delete" method="post" class="js-delete-form" data-item-title="{{ item.title|e('html_attr') }}">
+                            <input type="hidden" name="id" value="{{ item.id }}">
+                            <input type="hidden" name="page" value="{{ itemPagination.page }}">
+                            <input type="hidden" name="sort" value="{{ itemSort }}">
+                            <input type="hidden" name="dir" value="{{ itemDir }}">
+                            <button type="button" class="compact-action js-delete-trigger">Delete</button>
+                        </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if itemPagination.pages > 1 %}
+            <nav class="pager">
+                {% if itemPagination.has_prev %}
+                    <a href="?page={{ itemPagination.page - 1 }}&sort={{ itemSort }}&dir={{ itemDir }}">Previous</a>
+                {% endif %}
+                <span>Items page {{ itemPagination.page }} / {{ itemPagination.pages }}</span>
+                {% if itemPagination.has_next %}
+                    <a href="?page={{ itemPagination.page + 1 }}&sort={{ itemSort }}&dir={{ itemDir }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>No items yet.</p>
+    {% endif %}
+    </section>
+
+    <div class="confirm-backdrop" hidden data-delete-modal-backdrop>
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+            <h4 id="delete-modal-title">Delete item?</h4>
+            <p data-delete-modal-text>This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button type="button" class="secondary" data-delete-cancel>Cancel</button>
+                <button type="button" class="confirm-delete-btn" data-delete-confirm>Delete</button>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const backdrop = document.querySelector('[data-delete-modal-backdrop]');
+    const confirmBtn = document.querySelector('[data-delete-confirm]');
+    const cancelBtn = document.querySelector('[data-delete-cancel]');
+    const text = document.querySelector('[data-delete-modal-text]');
+    if (!(backdrop instanceof HTMLElement) || !(confirmBtn instanceof HTMLButtonElement) || !(cancelBtn instanceof HTMLButtonElement) || !(text instanceof HTMLElement)) {
+        return;
+    }
+
+    let pendingForm = null;
+    const openModal = (form) => {
+        pendingForm = form;
+        const title = (form.dataset.itemTitle || '').trim();
+        text.textContent = title !== ''
+            ? `Delete "${title}"? This action cannot be undone.`
+            : 'Delete this item? This action cannot be undone.';
+        backdrop.hidden = false;
+        confirmBtn.focus({ preventScroll: true });
+    };
+    const closeModal = () => {
+        backdrop.hidden = true;
+        pendingForm = null;
+    };
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('.js-delete-trigger');
+        if (!(trigger instanceof HTMLButtonElement)) {
+            return;
+        }
+        const form = trigger.closest('.js-delete-form');
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+        event.preventDefault();
+        openModal(form);
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) {
+            closeModal();
+        }
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !backdrop.hidden) {
+            closeModal();
+        }
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        if (!(pendingForm instanceof HTMLFormElement)) {
+            closeModal();
+            return;
+        }
+        const form = pendingForm;
+        closeModal();
+        form.submit();
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ app.name }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+
+        :root {
+            --bg: #f6f8fb;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --border: #dde4ee;
+            --text: #182433;
+            --muted: #66788f;
+            --accent: #4f8f2a;
+            --accent-strong: #3d7a1f;
+            --accent-soft: #edf6e8;
+            --shadow: 0 8px 22px rgba(19, 38, 68, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .shell {
+            max-width: 1380px;
+            margin: 0 auto;
+            padding: 1rem 1rem 1.8rem;
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: auto minmax(320px, 1fr) auto;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            padding: 0.62rem 0.9rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .topnav {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-self: end;
+        }
+
+        .topnav a {
+            text-decoration: none;
+            color: #3c526d;
+            padding: 0.34rem 0.62rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-size: 0.85rem;
+        }
+
+        .topnav a:hover {
+            background: #f1f5fa;
+            border-color: #d5dfeb;
+        }
+
+        .topnav a[aria-current="page"] {
+            background: var(--accent-soft);
+            border-color: #bad8a6;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .topnav a.admin-link {
+            color: #2f7a35;
+            border-color: #c6e0bb;
+            background: #f2f9ee;
+            font-weight: 600;
+        }
+
+        .topnav a.admin-link:hover {
+            background: #e8f4e2;
+            border-color: #b4d4a5;
+            color: #28672d;
+        }
+
+        .search-card,
+        .panel,
+        .catalog-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            box-shadow: var(--shadow);
+        }
+
+        .search-card {
+            padding: 0.82rem 0.9rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .topbar .search-card {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            align-self: center;
+        }
+
+        .topbar .search-card .grid {
+            display: block;
+            margin: 0;
+            gap: 0;
+        }
+
+        .topbar .search-card label {
+            margin: 0;
+            color: inherit;
+            font-size: 0;
+            line-height: 0;
+            display: block;
+        }
+
+        .topbar .search-card .autocomplete {
+            margin: 0;
+        }
+
+        .topbar .search-card input[data-autocomplete-input] {
+            min-height: 2rem;
+            height: 2rem;
+            margin: 0;
+        }
+
+        .search-card form {
+            margin: 0;
+        }
+
+        .search-card .grid {
+            margin: 0;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.45rem;
+        }
+
+        .search-card label {
+            margin: 0;
+            color: #5e728b;
+            font-size: 0.82rem;
+        }
+
+        .search-card input,
+        .search-card select,
+        .search-card button,
+        .panel input,
+        .panel select,
+        .panel button {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid #ccd8e7;
+        }
+
+        .search-card input::placeholder,
+        .panel input::placeholder {
+            color: #8ca0b8;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 288px minmax(0, 1fr);
+            gap: 0.9rem;
+            align-items: start;
+        }
+
+        aside {
+            position: sticky;
+            top: 0.75rem;
+            padding-top: 0.9rem;
+        }
+
+        .layout > aside > .panel + .panel {
+            position: relative;
+            margin-top: 0.62rem;
+            padding-top: 0.62rem;
+        }
+
+        .layout > aside > .panel + .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dfe7f1;
+        }
+
+        .layout > aside .filters-panel {
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .panel {
+            padding: 0.82rem;
+            margin-bottom: 0.72rem;
+            background: var(--surface);
+        }
+
+        .panel h4 {
+            margin: 0 0 0.5rem;
+            color: #7186a1;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .panel ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.1rem;
+            max-height: 17rem;
+            overflow: auto;
+        }
+
+        .panel a {
+            display: block;
+            text-decoration: none;
+            color: #3b5677;
+            font-size: 0.86rem;
+            padding: 0.3rem 0.45rem;
+            border-radius: 0.45rem;
+            transition: background .12s ease;
+        }
+
+        .panel a:hover {
+            background: #f3f7fb;
+        }
+
+        .panel a[aria-current="page"] {
+            background: var(--accent-soft);
+            border: 1px solid #b7d6a1;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .facet-panel .facet-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.36rem;
+            padding: 0 0.1rem;
+        }
+
+        .facet-panel h4 {
+            margin: 0;
+        }
+
+        .facet-panel {
+            box-shadow: none;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            margin-bottom: 0.86rem;
+        }
+
+        .facet-clear {
+            text-decoration: none;
+            font-size: 0.7rem;
+            color: #6f879f;
+            font-weight: 600;
+        }
+
+        .facet-clear:hover {
+            color: var(--accent-strong);
+        }
+
+        .facet-list {
+            max-height: 18rem;
+            overflow: auto;
+            gap: 0;
+        }
+
+        .facet-option {
+            display: flex;
+            align-items: center;
+            gap: 0.38rem;
+            width: 100%;
+            text-decoration: none;
+            border: 0;
+            border-radius: 0.28rem;
+            padding: 0.14rem 0.28rem;
+            color: #4d6481;
+            font-size: 0.79rem;
+            line-height: 1.15;
+        }
+
+        .facet-option:hover {
+            background: #f3f7fb;
+        }
+
+        .facet-option[aria-current="page"] {
+            background: #edf6e8;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .facet-option-all {
+            font-size: 0.75rem;
+            color: #6c839f;
+            grid-template-columns: minmax(0, 1fr);
+            column-gap: 0;
+        }
+
+        .facet-name {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .facet-count {
+            flex: 0 0 auto;
+            min-width: 1.5rem;
+            text-align: right;
+            font-size: 0.68rem;
+            color: #7c92ad;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            line-height: 1.2;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .facet-option[aria-current="page"] .facet-count {
+            color: #2e6d31;
+        }
+
+        .catalog-panel {
+            padding: 0.9rem;
+            min-width: 0;
+        }
+
+        .catalog-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .catalog-head h3 {
+            margin: 0;
+            font-size: 1.02rem;
+        }
+
+        .catalog-head .catalog-tools {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+            color: #6d84a0;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .catalog-head .catalog-tools select {
+            margin: 0;
+            min-width: 10.6rem;
+            height: 1.9rem;
+            padding: 0.2rem 1.5rem 0.2rem 0.5rem;
+            font-size: 0.78rem;
+            color: #4f6785;
+            border: 1px solid #d2dceb;
+            border-radius: 0.42rem;
+            background: #fff;
+        }
+
+        .catalog-head .catalog-count {
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .catalog-head p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.34rem;
+            margin-bottom: 0.58rem;
+        }
+
+        .chip {
+            background: #f1f5fb;
+            border: 1px solid #d6e0ec;
+            border-radius: 999px;
+            padding: 0.2rem 0.52rem;
+            font-size: 0.74rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #4b6380;
+        }
+
+        .chip a {
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));
+            gap: 0.72rem;
+        }
+
+        .product {
+            border: 1px solid #d5dfeb;
+            border-radius: 0.76rem;
+            overflow: hidden;
+            background: #fff;
+            padding: 0.34rem;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+        }
+
+        .product:hover {
+            transform: translateY(-2px);
+            border-color: #c3d2e4;
+            box-shadow: 0 8px 18px rgba(18, 36, 64, .10);
+        }
+
+        .product img {
+            width: 100%;
+            height: 138px;
+            object-fit: cover;
+            background: #edf2f8;
+            border-bottom: 1px solid #dde6f0;
+        }
+
+        .product-body {
+            padding: 0.54rem 0.54rem 0.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.26rem;
+            flex: 1 1 auto;
+        }
+
+        .product-title {
+            margin: 0;
+            font-size: 0.88rem;
+            line-height: 1.25;
+            color: #1a3556;
+        }
+
+        .product-desc {
+            margin: 0;
+            color: #667f9c;
+            font-size: 0.76rem;
+            min-height: 1.95rem;
+        }
+
+        .meta {
+            margin: 0;
+            color: #7f95af;
+            font-size: 0.72rem;
+        }
+
+        .product-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: auto;
+        }
+
+        .price {
+            margin: 0;
+            color: var(--accent-strong);
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .view-btn {
+            text-decoration: none;
+            background: var(--accent-soft);
+            border: 1px solid #b7d6a1;
+            color: var(--accent-strong);
+            border-radius: 0.42rem;
+            padding: 0.26rem 0.5rem;
+            font-weight: 600;
+            font-size: 0.74rem;
+        }
+
+        .pager {
+            margin: 0 0 0.58rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .pager-group,
+        .pager-tools {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.14rem;
+        }
+
+        .pager a,
+        .pager span {
+            min-width: 1.68rem;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid #d2deec;
+            border-radius: 0.42rem;
+            padding: 0.19rem 0.35rem;
+            background: #fff;
+            color: #547090;
+            font-size: 0.73rem;
+        }
+
+        .pager .active {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+            border-color: #b7d6a1;
+            font-weight: 700;
+        }
+
+        .pager .ellipsis {
+            border-style: dashed;
+            color: #8ca1bc;
+            background: #f9fbfe;
+        }
+
+        .pager .nav-link {
+            min-width: auto;
+            padding: 0.19rem 0.44rem;
+        }
+
+        .show-more-wrap {
+            margin-top: 0.78rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .show-more-link {
+            display: inline-block;
+            text-decoration: none;
+            border: 1px solid #b7d6a1;
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+            border-radius: 0.5rem;
+            padding: 0.36rem 0.72rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .show-more-link:hover {
+            background: #e6f2de;
+            border-color: #9cc688;
+            color: #2f6519;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.46rem;
+        }
+
+        .filters-grid .filter-range {
+            margin: 0;
+        }
+
+        .filters-grid input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 0.7rem;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+        }
+
+        .filters-grid .range-dual {
+            --range-start: 0%;
+            --range-end: 100%;
+            --range-handle-bg: #4f9b2f;
+            --range-handle-border: #ffffff;
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 0.7rem;
+            margin-top: 0.2rem;
+            border-radius: 999px;
+            background: linear-gradient(
+                to right,
+                #b8cae0 0 var(--range-start),
+                #4f7fb8 var(--range-start) var(--range-end),
+                #b8cae0 var(--range-end) 100%
+            );
+        }
+
+        .filters-grid input[type="range"]::-webkit-slider-runnable-track {
+            height: 0.18rem;
+            border-radius: 999px;
+            background: transparent;
+            border: 0;
+        }
+
+        .filters-grid input[type="range"]::-moz-range-track {
+            height: 0.18rem;
+            border-radius: 999px;
+            background: transparent;
+            border: 0;
+        }
+
+        .filters-grid input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 0.7rem;
+            height: 0.7rem;
+            border-radius: 50%;
+            background: var(--range-handle-bg);
+            border: 2px solid var(--range-handle-border);
+            box-shadow: 0 0 0 1px rgba(36, 57, 82, 0.15);
+            margin-top: -0.26rem;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .filters-grid input[type="range"]::-moz-range-thumb {
+            width: 0.7rem;
+            height: 0.7rem;
+            border-radius: 50%;
+            background: var(--range-handle-bg);
+            border: 2px solid var(--range-handle-border);
+            box-shadow: 0 0 0 1px rgba(36, 57, 82, 0.15);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .filters-grid label {
+            font-size: 0.74rem;
+            color: #7087a4;
+            margin: 0;
+            display: block;
+        }
+
+        .filters-grid .range-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+        }
+
+        .filters-grid .range-value {
+            color: #4f6785;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .autocomplete { position: relative; }
+
+        .autocomplete input[data-autocomplete-input] {
+            padding-right: 1.95rem;
+            min-height: 2.1rem;
+            height: 2.1rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a91a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='16.65' y1='16.65' x2='21' y2='21'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: 0.95rem 0.95rem;
+            background-position: right 0.6rem center;
+        }
+
+        .autocomplete.has-value input[data-autocomplete-input] {
+            background-image: none;
+        }
+
+        .autocomplete .main-search-clear {
+            position: absolute;
+            right: 0.35rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.08rem;
+            height: 1.08rem;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: #9baec3;
+            font-size: 0.88rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+        }
+
+        .autocomplete .main-search-clear.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .autocomplete .main-search-clear:hover {
+            background: #eef4fa;
+            color: #5f7896;
+        }
+
+        .autocomplete-results {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #cfdaea;
+            z-index: 9;
+            max-height: 220px;
+            overflow-y: auto;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            box-shadow: 0 10px 20px rgba(18, 36, 64, 0.12);
+            border-radius: 0 0 0.6rem 0.6rem;
+        }
+
+        .autocomplete-results li {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.86rem;
+            color: #365575;
+        }
+
+        .autocomplete-results li:hover,
+        .autocomplete-results li:focus {
+            background: #eef4fa;
+        }
+
+        .autocomplete-results[hidden] { display: none; }
+
+        .sort-table-wrap { margin-top: 0.45rem; }
+
+        .sort-panel {
+            margin-top: 0.45rem;
+            border: 1px solid #cfdaea;
+            border-radius: 0.6rem;
+            background: #fff;
+        }
+
+        .sort-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.82rem;
+            color: #597390;
+            font-weight: 600;
+        }
+
+        .sort-panel > summary::-webkit-details-marker { display: none; }
+
+        .sort-panel > summary::before {
+            content: "▸";
+            display: inline-block;
+            margin-right: 0.35rem;
+            transition: transform .15s ease;
+        }
+
+        .sort-panel[open] > summary::before { transform: rotate(90deg); }
+
+        .sort-panel .sort-table-wrap { margin: 0; padding: 0 0.55rem 0.55rem; }
+
+        .sort-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #d6e1ee;
+            border-radius: 0.55rem;
+            overflow: hidden;
+            font-size: 0.8rem;
+            background: #fff;
+        }
+
+        .sort-table th,
+        .sort-table td {
+            padding: 0.34rem 0.44rem;
+            border-bottom: 1px solid #e1e9f3;
+            vertical-align: middle;
+        }
+
+        .sort-table tr:last-child td { border-bottom: none; }
+
+        .sort-table th {
+            text-align: left;
+            background: #f7fafd;
+            color: #7289a5;
+            font-weight: 600;
+        }
+
+        .sort-table .drag-cell {
+            width: 2rem;
+            text-align: center;
+            color: #9db0c8;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .sort-table tr[draggable="true"] { cursor: grab; }
+        .sort-table tr.dragging { opacity: 0.5; }
+
+        .sort-table .field-cell { font-weight: 600; color: #2b4664; }
+
+        .sort-table .order-options {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.77rem;
+            color: #637c99;
+        }
+
+        .sort-table .order-options label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .sort-table .order-options input[type="radio"] { margin: 0; }
+
+        @media (max-width: 980px) {
+            .topbar {
+                grid-template-columns: 1fr;
+            }
+            .topnav {
+                justify-self: start;
+            }
+            .layout { grid-template-columns: 1fr; }
+            aside { position: static; top: auto; }
+            .products { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+        }
+
+        @media (max-width: 760px) {
+            .pager { justify-content: flex-start; }
+        }
+
+        /* --- Strict facet parity override (Meilisearch-like) --- */
+        .layout > aside .facet-panel {
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            border-radius: 0;
+            padding: 0;
+            margin: 0 0 0.9rem;
+        }
+
+        .layout > aside .facet-panel .facet-head {
+            margin: 0 0 0.35rem;
+            padding: 0;
+        }
+
+        .layout > aside .facet-panel h4 {
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            color: #7b8ea7;
+        }
+
+        .layout > aside .facet-panel .facet-clear {
+            font-size: 0.69rem;
+            color: #7d91ab;
+            text-decoration: none;
+            line-height: 1;
+            display: inline-block;
+            min-width: 2.2rem;
+            text-align: right;
+        }
+
+        .layout > aside .facet-panel .facet-clear:hover {
+            color: var(--accent-strong);
+        }
+
+        .layout > aside .facet-panel .facet-clear.is-hidden {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .layout > aside .facet-panel .facet-list {
+            display: block;
+            margin: 0;
+            padding: 0;
+            max-height: 20rem;
+            overflow: auto;
+        }
+
+        .layout > aside .facet-panel .facet-search {
+            position: relative;
+            margin: 0 0 0.34rem;
+        }
+
+        .layout > aside .facet-panel .facet-search input[type="text"] {
+            width: 100%;
+            height: 1.8rem;
+            margin: 0;
+            padding: 0.2rem 1.56rem 0.2rem 0.46rem;
+            font-size: 0.74rem;
+            border: 1px solid #d3deeb;
+            border-radius: 0.4rem;
+            background: #fff;
+            color: #49617f;
+        }
+
+        .layout > aside .facet-panel .facet-search input[type="text"]::placeholder {
+            color: #8da2bc;
+        }
+
+        .layout > aside .facet-panel .facet-search .facet-search-clear {
+            position: absolute;
+            right: 0.28rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.06rem;
+            height: 1.06rem;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: #9baec3;
+            font-size: 0.86rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+        }
+
+        .layout > aside .facet-panel .facet-search .facet-search-clear.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .layout > aside .facet-panel .facet-search .facet-search-clear:hover {
+            background: #eef4fa;
+            color: #5f7896;
+        }
+
+        .layout > aside .facet-panel .facet-list > .facet-row {
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+
+        .layout > aside .facet-panel .facet-option {
+            display: grid;
+            grid-template-columns: 0.72rem minmax(0, 1fr) auto;
+            align-items: center;
+            column-gap: 0.35rem;
+            width: 100%;
+            margin: 0;
+            padding: 0.13rem 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            color: #475e7c;
+            text-decoration: none;
+            font-size: 0.79rem;
+            line-height: 1.18;
+            list-style: none !important;
+            list-style-type: none !important;
+            counter-reset: none !important;
+            counter-increment: none !important;
+        }
+
+        /* Ensure "All ..." rows never reserve checkbox/count columns */
+        .layout > aside .facet-panel .facet-option.facet-option-all {
+            grid-template-columns: minmax(0, 1fr) !important;
+            column-gap: 0 !important;
+        }
+
+        /* Hard reset any inherited pseudo-content (e.g. alphabetic markers like "A.") */
+        .layout > aside .facet-panel .facet-option::before,
+        .layout > aside .facet-panel .facet-option::after,
+        .layout > aside .facet-panel .facet-option .facet-name::before,
+        .layout > aside .facet-panel .facet-option .facet-name::after,
+        .layout > aside .facet-panel .facet-option .facet-count::before,
+        .layout > aside .facet-panel .facet-option .facet-count::after {
+            content: none !important;
+            display: none !important;
+        }
+
+        .layout > aside .facet-panel .facet-checkbox {
+            width: 0.6rem;
+            height: 0.6rem;
+            border: 1px solid #c4d3e6;
+            border-radius: 0.15rem;
+            background: #fff;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .layout > aside .facet-panel .facet-option[aria-current="page"] .facet-checkbox {
+            background: #4f8f2a;
+            border-color: #4f8f2a;
+        }
+
+        .layout > aside .facet-panel .facet-option[aria-current="page"] .facet-checkbox::after {
+            content: "";
+            position: absolute;
+            left: 0.14rem;
+            top: 0.03rem;
+            width: 0.2rem;
+            height: 0.34rem;
+            border: solid #fff;
+            border-width: 0 0.09rem 0.09rem 0;
+            transform: rotate(45deg);
+        }
+
+        .layout > aside .facet-panel .facet-option:hover {
+            color: #2f4765;
+            background: transparent;
+        }
+
+        .layout > aside .facet-panel .facet-option[aria-current="page"] {
+            color: #2f6f36;
+            font-weight: 600;
+            background: transparent;
+        }
+
+        .layout > aside .facet-panel .facet-option-all[aria-current="page"] {
+            color: var(--accent-strong);
+        }
+
+        .layout > aside .facet-panel .facet-name {
+            display: block !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            list-style: none !important;
+            list-style-type: none !important;
+            counter-reset: none !important;
+            counter-increment: none !important;
+        }
+
+        .layout > aside .facet-panel .facet-count {
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+            color: #8a9cb5;
+            min-width: 1.55rem;
+            text-align: right;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .layout > aside .facet-panel .facet-option[aria-current="page"] .facet-count {
+            color: #5b7d5d;
+        }
+
+        /* Absolute safeguard: nuke any markers/counters injected by external/global CSS */
+        .layout > aside .facet-panel *,
+        .layout > aside .facet-panel *::before,
+        .layout > aside .facet-panel *::after {
+            counter-reset: none !important;
+            counter-increment: none !important;
+        }
+
+        .layout > aside .facet-panel * {
+            list-style: none !important;
+            list-style-type: none !important;
+        }
+
+        .layout > aside .facet-panel *::marker {
+            content: "" !important;
+            font-size: 0 !important;
+        }
+
+    </style>
+</head>
+<body>
+<main class="shell">
+    <div class="topbar">
+        <p class="brand">{{ app.name }}</p>
+        <div class="search-card">
+            <form method="get">
+                <div class="grid">
+                    <label>
+                        Search
+                        <div class="autocomplete">
+                            <input type="text" name="q" value="{{ search.query }}" autocomplete="off" data-autocomplete-input data-autocomplete-endpoint="/api/autocomplete" data-min-query-len="{{ search.min_query_len }}">
+                            <button type="button" class="main-search-clear" data-main-search-clear aria-label="Clear main search">×</button>
+                            <ul class="autocomplete-results" hidden data-autocomplete-results></ul>
+                        </div>
+                    </label>
+                </div>
+                {% set primary_sort = search.sort_rows|first %}
+                <input type="hidden" name="sort[]" value="{{ primary_sort.field|default('relevance') }}">
+                <input type="hidden" name="order_by_field[{{ primary_sort.field|default('relevance') }}]" value="{{ primary_sort.order|default('desc') }}">
+                <input type="hidden" name="page" value="1">
+                {% for id in search.filters.category %}
+                    <input type="hidden" name="category[]" value="{{ id }}">
+                {% endfor %}
+                {% for id in search.filters.tag %}
+                    <input type="hidden" name="tag[]" value="{{ id }}">
+                {% endfor %}
+                {% if search.filters.price_min is not null %}<input type="hidden" name="price_min" value="{{ search.filters.price_min }}">{% endif %}
+                {% if search.filters.price_max is not null %}<input type="hidden" name="price_max" value="{{ search.filters.price_max }}">{% endif %}
+                {% if search.filters.release_year_min is not null %}<input type="hidden" name="release_year_min" value="{{ search.filters.release_year_min }}">{% endif %}
+                {% if search.filters.release_year_max is not null %}<input type="hidden" name="release_year_max" value="{{ search.filters.release_year_max }}">{% endif %}
+                {% if search.filters.play_time_min is not null %}<input type="hidden" name="play_time_min" value="{{ search.filters.play_time_min }}">{% endif %}
+                {% if search.filters.play_time_max is not null %}<input type="hidden" name="play_time_max" value="{{ search.filters.play_time_max }}">{% endif %}
+                {% if search.filters.player_count_min is not null %}<input type="hidden" name="player_count_min" value="{{ search.filters.player_count_min }}">{% endif %}
+                {% if search.filters.player_count_max is not null %}<input type="hidden" name="player_count_max" value="{{ search.filters.player_count_max }}">{% endif %}
+                <input type="hidden" name="limit" value="{{ search.limit }}">
+            </form>
+        </div>
+        <div class="topnav">
+            {% for link in menu %}
+                {% if link.label != 'Catalog' %}
+                    <a
+                        href="{{ link.href }}"
+                        class="{{ link.label == 'Admin Dashboard' ? 'admin-link' : '' }}"
+                        aria-current="{{ link.active ? 'page' : 'false' }}"
+                    >{{ link.label }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="layout">
+        <aside>
+            <section class="panel facet-panel" data-ajax-category-panel>
+                <div class="facet-head">
+                    <h4>Categories</h4>
+                    <a
+                        class="facet-clear{% if search.filters.category|length == 0 %} is-hidden{% endif %}"
+                        data-facet-clear="category"
+                        href="{{ category_all_link }}"
+                    >Clear</a>
+                </div>
+                <div class="facet-search">
+                    <input type="text" placeholder="Search categories" data-facet-search="category" autocomplete="off" spellcheck="false">
+                    <button type="button" class="facet-search-clear" data-facet-search-clear aria-label="Clear categories search">×</button>
+                </div>
+                <div class="facet-list" role="list">
+                    {% for option in categories %}
+                        <div class="facet-row" role="listitem">
+                            <a class="facet-option" href="{{ option.href }}" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
+                                <span class="facet-checkbox" aria-hidden="true"></span>
+                                <span class="facet-name">{{ option.label|replace({'A. ': '', 'A.': '', 'a. ': '', 'a.': ''}) }}</span>
+                                <span class="facet-count">({{ option.count }})</span>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            <section class="panel facet-panel" data-ajax-tag-panel>
+                <div class="facet-head">
+                    <h4>Tags</h4>
+                    <a
+                        class="facet-clear{% if search.filters.tag|length == 0 %} is-hidden{% endif %}"
+                        data-facet-clear="tag"
+                        href="{{ tag_all_link }}"
+                    >Clear</a>
+                </div>
+                <div class="facet-search">
+                    <input type="text" placeholder="Search tags" data-facet-search="tag" autocomplete="off" spellcheck="false">
+                    <button type="button" class="facet-search-clear" data-facet-search-clear aria-label="Clear tags search">×</button>
+                </div>
+                <div class="facet-list" role="list">
+                    {% for option in tags %}
+                        <div class="facet-row" role="listitem">
+                            <a class="facet-option" href="{{ option.href }}" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
+                                <span class="facet-checkbox" aria-hidden="true"></span>
+                                <span class="facet-name">{{ option.label|replace({'A. ': '', 'A.': '', 'a. ': '', 'a.': ''}) }}</span>
+                                <span class="facet-count">({{ option.count }})</span>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            <section class="panel filters-panel">
+                <form method="get">
+                    <input type="hidden" name="q" value="{{ search.query }}">
+                    <input type="hidden" name="limit" value="{{ search.limit }}">
+                    {% set primary_sort = search.sort_rows|first %}
+                    <input type="hidden" name="sort[]" value="{{ primary_sort.field|default('relevance') }}">
+                    <input type="hidden" name="order_by_field[{{ primary_sort.field|default('relevance') }}]" value="{{ primary_sort.order|default('desc') }}">
+                    <input type="hidden" name="page" value="1">
+                    {% for id in search.filters.category %}
+                        <input type="hidden" name="category[]" value="{{ id }}">
+                    {% endfor %}
+                    {% for id in search.filters.tag %}
+                        <input type="hidden" name="tag[]" value="{{ id }}">
+                    {% endfor %}
+                    <div class="filters-grid">
+                        <label class="filter-range" data-range-pair>
+                            <span class="range-head"><span>Price</span><span class="range-value" id="filter-price-value"></span></span>
+                            <span class="range-dual">
+                                <input class="range-input" type="range" min="0" max="300" step="1" name="price_min" data-neutral="0" data-range-role="min" data-range-value-target="filter-price-value" value="{{ search.filters.price_min is not null ? search.filters.price_min : 0 }}">
+                                <input class="range-input" type="range" min="0" max="300" step="1" name="price_max" data-neutral="300" data-range-role="max" data-range-value-target="filter-price-value" value="{{ search.filters.price_max is not null ? search.filters.price_max : 300 }}">
+                            </span>
+                        </label>
+                        <label class="filter-range" data-range-pair>
+                            <span class="range-head"><span>Year</span><span class="range-value" id="filter-year-value"></span></span>
+                            <span class="range-dual">
+                                <input class="range-input" type="range" min="1900" max="{{ "now"|date("Y") }}" step="1" name="release_year_min" data-neutral="1900" data-range-role="min" data-range-value-target="filter-year-value" value="{{ search.filters.release_year_min is not null ? search.filters.release_year_min : 1900 }}">
+                                <input class="range-input" type="range" min="1900" max="{{ "now"|date("Y") }}" step="1" name="release_year_max" data-neutral="{{ "now"|date("Y") }}" data-range-role="max" data-range-value-target="filter-year-value" value="{{ search.filters.release_year_max is not null ? search.filters.release_year_max : ("now"|date("Y")) }}">
+                            </span>
+                        </label>
+                        <label class="filter-range" data-range-pair>
+                            <span class="range-head"><span>Players</span><span class="range-value" id="filter-players-value"></span></span>
+                            <span class="range-dual">
+                                <input class="range-input" type="range" min="1" max="12" step="1" name="player_count_min" data-neutral="1" data-range-role="min" data-range-value-target="filter-players-value" value="{{ search.filters.player_count_min is not null ? search.filters.player_count_min : 1 }}">
+                                <input class="range-input" type="range" min="1" max="12" step="1" name="player_count_max" data-neutral="12" data-range-role="max" data-range-value-target="filter-players-value" value="{{ search.filters.player_count_max is not null ? search.filters.player_count_max : 12 }}">
+                            </span>
+                        </label>
+                        <label class="filter-range" data-range-pair>
+                            <span class="range-head"><span>Play Time (min)</span><span class="range-value" id="filter-playtime-value"></span></span>
+                            <span class="range-dual">
+                                <input class="range-input" type="range" min="10" max="360" step="5" name="play_time_min" data-neutral="10" data-range-role="min" data-range-value-target="filter-playtime-value" value="{{ search.filters.play_time_min is not null ? search.filters.play_time_min : 10 }}">
+                                <input class="range-input" type="range" min="10" max="360" step="5" name="play_time_max" data-neutral="360" data-range-role="max" data-range-value-target="filter-playtime-value" value="{{ search.filters.play_time_max is not null ? search.filters.play_time_max : 360 }}">
+                            </span>
+                        </label>
+                    </div>
+                </form>
+            </section>
+        </aside>
+
+        <section class="catalog-panel" data-ajax-results-area>
+            {% set primary_sort = search.sort_rows|first %}
+            {% set current_sort_value = (primary_sort.field|default('relevance')) ~ ':' ~ (primary_sort.order|default('desc')) %}
+            {% set has_query_text = search.query|trim != '' %}
+            <div class="catalog-head">
+                <h3>
+                    Catalog:
+                    <span class="catalog-count">
+                        {{ search.results ? search.results.total : 0 }} items found
+                        {% if search.results and search.results.query_time_ms is defined %}
+                            in {{ search.results.query_time_ms }} ms
+                        {% endif %}
+                    </span>
+                </h3>
+                <div class="catalog-tools">
+                    <label for="catalog-sort-select">Sort by</label>
+                    <select id="catalog-sort-select" data-catalog-sort-select>
+                        <option value="relevance:desc" {{ current_sort_value == 'relevance:desc' ? 'selected' : '' }}>
+                            {{ has_query_text ? 'Relevance' : 'Featured' }}
+                        </option>
+                        <option value="price:asc" {{ current_sort_value == 'price:asc' ? 'selected' : '' }}>Price: low to high</option>
+                        <option value="price:desc" {{ current_sort_value == 'price:desc' ? 'selected' : '' }}>Price: high to low</option>
+                        <option value="title:asc" {{ current_sort_value == 'title:asc' ? 'selected' : '' }}>Name: A to Z</option>
+                        <option value="title:desc" {{ current_sort_value == 'title:desc' ? 'selected' : '' }}>Name: Z to A</option>
+                        <option value="release_year:desc" {{ current_sort_value == 'release_year:desc' ? 'selected' : '' }}>Year: newest first</option>
+                        <option value="release_year:asc" {{ current_sort_value == 'release_year:asc' ? 'selected' : '' }}>Year: oldest first</option>
+                    </select>
+                </div>
+            </div>
+
+            {% set has_attr_filters = search.filters.price_min or search.filters.price_max or search.filters.release_year_min or search.filters.release_year_max or search.filters.play_time_min or search.filters.play_time_max or search.filters.player_count_min or search.filters.player_count_max %}
+            {% set has_any_search_constraints = search.query or search.filters.category|length > 0 or search.filters.tag|length > 0 or has_attr_filters %}
+
+            {% if search.error %}
+                <mark>{{ search.error }}</mark>
+            {% endif %}
+
+            {% if search.results and search.results.count > 0 %}
+                <div class="products">
+                    {% for hit in search.results.hits %}
+                        <article class="product">
+                            {% if hit.image_url %}
+                                <img src="{{ hit.image_url }}" alt="{{ hit.title }}">
+                            {% else %}
+                                <img src="/images/placeholder.png" alt="Placeholder">
+                            {% endif %}
+                            <div class="product-body">
+                                <h4 class="product-title">{{ hit.title }}</h4>
+                                <p class="product-desc">{{ hit.description|slice(0, 120) }}{% if hit.description|length > 120 %}…{% endif %}</p>
+                                <div class="product-foot">
+                                    <p class="price">{{ hit.price is not null ? '$' ~ hit.price|number_format(2, '.', ',') : 'N/A' }}</p>
+                                    <a class="view-btn" href="/items/{{ hit.id }}">View</a>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+                {% if search.links.next %}
+                    <div class="show-more-wrap">
+                        <a class="show-more-link" data-show-more-link href="{{ search.links.next }}">Show more games</a>
+                    </div>
+                {% endif %}
+            {% elseif has_any_search_constraints %}
+                {% if search.query %}
+                    <p>No matches found for <strong>{{ search.query }}</strong> with the selected filters.</p>
+                {% else %}
+                    <p>No matches found for the selected filters.</p>
+                {% endif %}
+            {% else %}
+                <p>No documents in the table yet. Upload a CSV to get started.</p>
+            {% endif %}
+        </section>
+    </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let pageRequestController = null;
+    let lastCatalogUrl = new URL(window.location.href);
+
+    const getMainShell = () => document.querySelector('main.shell');
+    const getActiveFilterFieldState = () => {
+        const active = document.activeElement;
+        if (!(active instanceof HTMLInputElement)) {
+            return null;
+        }
+        if (!active.closest('.filters-grid')) {
+            return null;
+        }
+        if (!active.name) {
+            return null;
+        }
+        return {
+            name: active.name,
+            value: active.value,
+            selectionStart: active.selectionStart,
+            selectionEnd: active.selectionEnd,
+        };
+    };
+
+    const restoreActiveFilterFieldState = (state) => {
+        if (!state) {
+            return;
+        }
+        const candidates = document.querySelectorAll('.filters-grid input');
+        let target = null;
+        candidates.forEach((el) => {
+            if (target) {
+                return;
+            }
+            if (el instanceof HTMLInputElement && el.name === state.name) {
+                target = el;
+            }
+        });
+        if (!target) {
+            return;
+        }
+        target.focus({ preventScroll: true });
+        if (target.value !== state.value) {
+            target.value = state.value;
+        }
+        if (
+            typeof state.selectionStart === 'number'
+            && typeof state.selectionEnd === 'number'
+            && typeof target.setSelectionRange === 'function'
+        ) {
+            try {
+                const max = target.value.length;
+                const start = Math.max(0, Math.min(state.selectionStart, max));
+                const end = Math.max(0, Math.min(state.selectionEnd, max));
+                target.setSelectionRange(start, end);
+                return;
+            } catch (e) {
+                // Some input types (notably number) don't support setSelectionRange.
+            }
+        }
+
+        // Fallback for non-text-like inputs: keep focus and move caret to the end.
+        const value = target.value;
+        target.value = '';
+        target.value = value;
+    };
+
+    const fetchAndReplaceCatalog = async (url, options = {}) => {
+        const preserveFacetCounts = options.preserveFacetCounts === true;
+        const sortPanelWasOpen = !!document.querySelector('.sort-panel[open]');
+        const activeFilterField = getActiveFilterFieldState();
+        if (pageRequestController) {
+            pageRequestController.abort();
+        }
+        pageRequestController = new AbortController();
+        const currentMain = getMainShell();
+        if (!currentMain) {
+            return;
+        }
+        try {
+            const response = await fetch(url, {
+                signal: pageRequestController.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to load catalog page');
+            }
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const nextResultsArea = doc.querySelector('[data-ajax-results-area]');
+            const currentResultsArea = document.querySelector('[data-ajax-results-area]');
+            const nextCategoryPanel = doc.querySelector('[data-ajax-category-panel]');
+            const nextTagPanel = doc.querySelector('[data-ajax-tag-panel]');
+
+            if (
+                !nextResultsArea || !currentResultsArea
+                || !nextCategoryPanel
+                || !nextTagPanel
+            ) {
+                throw new Error('Catalog payload is invalid');
+            }
+            const nextTitle = doc.querySelector('title');
+            if (nextTitle && nextTitle.textContent) {
+                document.title = nextTitle.textContent;
+            }
+            currentResultsArea.replaceWith(nextResultsArea);
+            lastCatalogUrl = new URL(url, window.location.origin);
+            if (!preserveFacetCounts) {
+                syncFacetCountsFromDoc(nextCategoryPanel, nextTagPanel);
+            }
+            syncFacetUiFromUrl();
+            if (sortPanelWasOpen) {
+                const nextSortPanel = document.querySelector('.sort-panel');
+                if (nextSortPanel) {
+                    nextSortPanel.setAttribute('open', 'open');
+                }
+            }
+            restoreActiveFilterFieldState(activeFilterField);
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                return;
+            }
+            window.location.assign(url);
+        }
+    };
+    const fetchAndAppendCatalog = async (url) => {
+        if (pageRequestController) {
+            pageRequestController.abort();
+        }
+        pageRequestController = new AbortController();
+        try {
+            const response = await fetch(url, {
+                signal: pageRequestController.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to load next catalog page');
+            }
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const nextResultsArea = doc.querySelector('[data-ajax-results-area]');
+            const currentResultsArea = document.querySelector('[data-ajax-results-area]');
+            if (!nextResultsArea || !currentResultsArea) {
+                throw new Error('Catalog payload is invalid');
+            }
+
+            const nextProducts = nextResultsArea.querySelector('.products');
+            const currentProducts = currentResultsArea.querySelector('.products');
+            if (!nextProducts || !currentProducts) {
+                throw new Error('Catalog payload is missing products');
+            }
+
+            Array.from(nextProducts.children).forEach((card) => {
+                currentProducts.appendChild(card);
+            });
+
+            const currentShowMore = currentResultsArea.querySelector('[data-show-more-link]');
+            const nextShowMore = nextResultsArea.querySelector('[data-show-more-link]');
+            if (currentShowMore instanceof HTMLAnchorElement) {
+                if (nextShowMore instanceof HTMLAnchorElement) {
+                    currentShowMore.href = nextShowMore.href;
+                } else {
+                    const wrap = currentShowMore.closest('.show-more-wrap');
+                    if (wrap) {
+                        wrap.remove();
+                    } else {
+                        currentShowMore.remove();
+                    }
+                }
+            }
+
+            lastCatalogUrl = new URL(url, window.location.origin);
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                return;
+            }
+            window.location.assign(url);
+        }
+    };
+
+    const buildFormUrl = (form) => {
+        const action = form.getAttribute('action') || window.location.pathname;
+        const url = new URL(action, window.location.origin);
+        const params = new URLSearchParams(new FormData(form));
+        url.search = params.toString();
+        return url;
+    };
+
+    const shouldHandleCatalogUrl = (url) => url.origin === window.location.origin && url.pathname === '/';
+    const getFacetSelectionOrderFromUrl = (paramName, url = lastCatalogUrl) => {
+        const parsed = new URL(url.toString(), window.location.origin);
+        const collected = [];
+        parsed.searchParams.forEach((value, key) => {
+            if (key === paramName || key === (paramName + '[]')) {
+                collected.push(value);
+                return;
+            }
+            if (new RegExp(`^${paramName}\\[\\d+\\]$`).test(key)) {
+                collected.push(value);
+            }
+        });
+        return collected.filter(Boolean);
+    };
+    const clearFacetSelectionParams = (url, paramName) => {
+        const keysToDelete = [];
+        url.searchParams.forEach((_, key) => {
+            if (key === paramName || key === (paramName + '[]') || new RegExp(`^${paramName}\\[\\d+\\]$`).test(key)) {
+                keysToDelete.push(key);
+            }
+        });
+        keysToDelete.forEach((key) => url.searchParams.delete(key));
+    };
+    const resetPagination = (url) => {
+        url.searchParams.set('page', '1');
+        url.searchParams.delete('scroll');
+    };
+    const setFacetSelectionInUrl = (url, paramName, values) => {
+        clearFacetSelectionParams(url, paramName);
+        values.forEach((value, idx) => url.searchParams.append(`${paramName}[${idx}]`, value));
+    };
+    const clearSortParams = (url) => {
+        const keysToDelete = [];
+        url.searchParams.forEach((_, key) => {
+            if (key === 'sort' || key === 'order' || key === 'order_by_field') {
+                keysToDelete.push(key);
+                return;
+            }
+            if (/^sort\[(\d+)\]$/.test(key) || /^order\[(\d+)\]$/.test(key) || /^order_by_field\[[^\]]+\]$/.test(key)) {
+                keysToDelete.push(key);
+            }
+        });
+        keysToDelete.forEach((key) => url.searchParams.delete(key));
+    };
+    const applySortSelectionToUrl = (url, value) => {
+        const raw = String(value || '');
+        const parts = raw.split(':');
+        const field = (parts[0] || 'relevance').trim();
+        const order = ((parts[1] || 'desc').trim().toLowerCase() === 'asc') ? 'asc' : 'desc';
+        clearSortParams(url);
+        url.searchParams.append('sort[0]', field);
+        url.searchParams.append(`order_by_field[${field}]`, order);
+    };
+    const buildFacetToggleUrl = (link) => {
+        const panel = link.closest('[data-ajax-category-panel], [data-ajax-tag-panel]');
+        if (!panel) {
+            return null;
+        }
+        const paramName = panel.hasAttribute('data-ajax-category-panel') ? 'category' : 'tag';
+        const url = new URL(lastCatalogUrl.toString());
+        const selected = getFacetSelectionOrderFromUrl(paramName, url);
+        if (link.dataset.facetClear === paramName) {
+            setFacetSelectionInUrl(url, paramName, []);
+            resetPagination(url);
+            return url;
+        }
+        const facetId = link.dataset.facetId || '';
+        if (facetId === '') {
+            return null;
+        }
+        const nextSelected = selected.includes(facetId)
+            ? selected.filter((item) => item !== facetId)
+            : [...selected, facetId];
+        setFacetSelectionInUrl(url, paramName, nextSelected);
+        resetPagination(url);
+        return url;
+    };
+    const setFacetPanelState = (panelSelector, paramName) => {
+        const panel = document.querySelector(panelSelector);
+        if (!panel) {
+            return;
+        }
+        const selected = getFacetSelectionOrderFromUrl(paramName);
+        const selectedSet = new Set(selected);
+        const options = panel.querySelectorAll('.facet-option[data-facet-id]');
+        options.forEach((link) => {
+            if (!(link instanceof HTMLAnchorElement)) {
+                return;
+            }
+            const facetId = link.dataset.facetId || '';
+            const active = facetId !== '' && selectedSet.has(facetId);
+            link.setAttribute('aria-current', active ? 'page' : 'false');
+        });
+        const clearLink = panel.querySelector(`[data-facet-clear="${paramName}"]`);
+        if (clearLink instanceof HTMLAnchorElement) {
+            clearLink.classList.toggle('is-hidden', selected.length === 0);
+            const clearUrl = new URL(lastCatalogUrl.toString());
+            setFacetSelectionInUrl(clearUrl, paramName, []);
+            resetPagination(clearUrl);
+            clearLink.href = clearUrl.toString();
+        }
+    };
+    const syncFacetCountsFromDoc = (nextCategoryPanel, nextTagPanel) => {
+        const sync = (currentSelector, nextPanel) => {
+            const currentPanel = document.querySelector(currentSelector);
+            if (!currentPanel || !nextPanel) {
+                return;
+            }
+            const nextMap = new Map();
+            nextPanel.querySelectorAll('.facet-option[data-facet-id]').forEach((el) => {
+                if (!(el instanceof HTMLAnchorElement)) {
+                    return;
+                }
+                const facetId = el.dataset.facetId || '';
+                const countEl = el.querySelector('.facet-count');
+                if (!facetId || !(countEl instanceof HTMLElement)) {
+                    return;
+                }
+                nextMap.set(facetId, countEl.textContent || '(0)');
+            });
+            currentPanel.querySelectorAll('.facet-option[data-facet-id]').forEach((el) => {
+                if (!(el instanceof HTMLAnchorElement)) {
+                    return;
+                }
+                const facetId = el.dataset.facetId || '';
+                const countEl = el.querySelector('.facet-count');
+                if (!facetId || !(countEl instanceof HTMLElement)) {
+                    return;
+                }
+                if (nextMap.has(facetId)) {
+                    countEl.textContent = nextMap.get(facetId);
+                }
+            });
+        };
+        sync('[data-ajax-category-panel]', nextCategoryPanel);
+        sync('[data-ajax-tag-panel]', nextTagPanel);
+    };
+    const syncFacetUiFromUrl = () => {
+        setFacetPanelState('[data-ajax-category-panel]', 'category');
+        setFacetPanelState('[data-ajax-tag-panel]', 'tag');
+        reorderFacetOptions();
+    };
+    const reorderFacetPanel = (panel, paramName, selectedOrderOverride = null) => {
+        if (!panel) {
+            return;
+        }
+        const list = panel.querySelector('.facet-list');
+        if (!list) {
+            return;
+        }
+        const rows = Array.from(list.querySelectorAll('.facet-row'));
+        if (!rows.length) {
+            return;
+        }
+        const selectedOrder = selectedOrderOverride ?? getFacetSelectionOrderFromUrl(paramName);
+        const selectedIndexMap = new Map(selectedOrder.map((facetId, idx) => [facetId, idx]));
+
+        const selectedRows = [];
+        const unselectedRows = [];
+        rows.forEach((row, idx) => {
+            const link = row.querySelector('.facet-option');
+            const originalIndex = link instanceof HTMLAnchorElement
+                ? Number.parseInt(link.dataset.facetIndex || String(idx), 10)
+                : idx;
+            if (!(link instanceof HTMLAnchorElement)) {
+                unselectedRows.push({ row, idx, originalIndex });
+                return;
+            }
+            const active = link.getAttribute('aria-current') === 'page';
+            if (!active) {
+                unselectedRows.push({ row, idx, originalIndex });
+                return;
+            }
+            const facetId = link.dataset.facetId || '';
+            const orderIdx = selectedIndexMap.has(facetId) ? selectedIndexMap.get(facetId) : Number.MAX_SAFE_INTEGER;
+            selectedRows.push({ row, idx, originalIndex, orderIdx });
+        });
+
+        selectedRows.sort((a, b) => {
+            if (a.orderIdx !== b.orderIdx) {
+                return a.orderIdx - b.orderIdx;
+            }
+            return a.idx - b.idx;
+        });
+        unselectedRows.sort((a, b) => a.originalIndex - b.originalIndex);
+
+        const fragment = document.createDocumentFragment();
+        selectedRows.forEach((item) => fragment.appendChild(item.row));
+        unselectedRows.forEach((item) => fragment.appendChild(item.row));
+        list.appendChild(fragment);
+    };
+    const reorderFacetBlock = (panelSelector, paramName, selectedOrderOverride = null) => {
+        const panel = document.querySelector(panelSelector);
+        reorderFacetPanel(panel, paramName, selectedOrderOverride);
+    };
+    const reorderFacetOptions = () => {
+        reorderFacetBlock('[data-ajax-category-panel]', 'category');
+        reorderFacetBlock('[data-ajax-tag-panel]', 'tag');
+    };
+    const applyFacetClickReorder = (link) => {
+        const panel = link.closest('[data-ajax-category-panel], [data-ajax-tag-panel]');
+        if (!panel) {
+            return;
+        }
+        const paramName = panel.hasAttribute('data-ajax-category-panel') ? 'category' : 'tag';
+        const facetId = link.dataset.facetId || '';
+        if (facetId === '') {
+            return;
+        }
+        const isActive = link.getAttribute('aria-current') === 'page';
+        if (!isActive) {
+            link.setAttribute('aria-current', 'page');
+        } else {
+            link.setAttribute('aria-current', 'false');
+        }
+        const selectedOrderNow = Array.from(panel.querySelectorAll('.facet-option[aria-current="page"][data-facet-id]'))
+            .map((a) => a instanceof HTMLAnchorElement ? (a.dataset.facetId || '') : '')
+            .filter(Boolean);
+        reorderFacetPanel(panel, paramName, selectedOrderNow);
+    };
+    const getFacetSelectionOrderFromDom = (panelSelector) => {
+        const panel = document.querySelector(panelSelector);
+        if (!panel) {
+            return [];
+        }
+        return Array.from(panel.querySelectorAll('.facet-option[aria-current="page"][data-facet-id]'))
+            .map((el) => el instanceof HTMLAnchorElement ? (el.dataset.facetId || '') : '')
+            .filter(Boolean);
+    };
+    const applyLiveInputsToUrl = (url, facetSource = 'url') => {
+        // Any criteria update starts a fresh pagination session.
+        url.searchParams.delete('scroll');
+        const selectedCategoryIds = facetSource === 'dom'
+            ? getFacetSelectionOrderFromDom('[data-ajax-category-panel]')
+            : getFacetSelectionOrderFromUrl('category', url);
+        const selectedTagIds = facetSource === 'dom'
+            ? getFacetSelectionOrderFromDom('[data-ajax-tag-panel]')
+            : getFacetSelectionOrderFromUrl('tag', url);
+        setFacetSelectionInUrl(url, 'category', selectedCategoryIds);
+        setFacetSelectionInUrl(url, 'tag', selectedTagIds);
+        const sortSelect = document.querySelector('[data-catalog-sort-select]');
+        if (sortSelect instanceof HTMLSelectElement) {
+            applySortSelectionToUrl(url, sortSelect.value);
+        }
+
+        const isNeutralFilterInput = (input) => {
+            if (!(input instanceof HTMLInputElement)) {
+                return true;
+            }
+            const value = input.value.trim();
+            if (value === '') {
+                return true;
+            }
+            const neutral = input.dataset.neutral;
+            return typeof neutral === 'string' && neutral !== '' && value === neutral;
+        };
+        const searchInput = document.querySelector('[data-autocomplete-input]');
+        if (searchInput instanceof HTMLInputElement) {
+            const q = searchInput.value.trim();
+            if (q === '') {
+                url.searchParams.delete('q');
+            } else {
+                url.searchParams.set('q', q);
+            }
+        }
+
+        const filterInputs = document.querySelectorAll('.filters-grid input');
+        const filterKeys = [
+            'price_min',
+            'price_max',
+            'release_year_min',
+            'release_year_max',
+            'player_count_min',
+            'player_count_max',
+            'play_time_min',
+            'play_time_max',
+        ];
+        filterKeys.forEach((key) => url.searchParams.delete(key));
+        filterInputs.forEach((input) => {
+            if (!(input instanceof HTMLInputElement) || !input.name) {
+                return;
+            }
+            if (!filterKeys.includes(input.name)) {
+                return;
+            }
+            if (isNeutralFilterInput(input)) {
+                return;
+            } else {
+                url.searchParams.set(input.name, input.value.trim());
+            }
+        });
+    };
+
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+        if ((form.method || 'get').toLowerCase() !== 'get') {
+            return;
+        }
+        if (!form.closest('main.shell')) {
+            return;
+        }
+        const url = new URL(lastCatalogUrl.toString(), window.location.origin);
+        if (!shouldHandleCatalogUrl(url)) {
+            return;
+        }
+        applyLiveInputsToUrl(url, 'dom');
+        e.preventDefault();
+        const hasActiveFacetFilters =
+            getFacetSelectionOrderFromDom('[data-ajax-category-panel]').length > 0
+            || getFacetSelectionOrderFromDom('[data-ajax-tag-panel]').length > 0;
+        fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts: hasActiveFacetFilters });
+    });
+    document.addEventListener('change', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLSelectElement) || !target.matches('[data-catalog-sort-select]')) {
+            return;
+        }
+        const url = new URL(lastCatalogUrl.toString(), window.location.origin);
+        applySortSelectionToUrl(url, target.value);
+        applyLiveInputsToUrl(url, 'dom');
+        resetPagination(url);
+        const hasActiveFacetFilters =
+            getFacetSelectionOrderFromDom('[data-ajax-category-panel]').length > 0
+            || getFacetSelectionOrderFromDom('[data-ajax-tag-panel]').length > 0;
+        fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts: hasActiveFacetFilters });
+    });
+
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (!link) {
+            return;
+        }
+        if (!link.closest('main.shell')) {
+            return;
+        }
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || link.target === '_blank') {
+            return;
+        }
+        if (link.matches('[data-show-more-link]')) {
+            const href = link.getAttribute('href');
+            if (!href) {
+                return;
+            }
+            const url = new URL(href, window.location.origin);
+            if (!shouldHandleCatalogUrl(url)) {
+                return;
+            }
+            e.preventDefault();
+            fetchAndAppendCatalog(url.toString());
+            return;
+        }
+        let url = null;
+        if (link.closest('[data-ajax-category-panel], [data-ajax-tag-panel]')) {
+            if (link.classList.contains('facet-option') && link.dataset.facetId) {
+                applyFacetClickReorder(link);
+            }
+            url = buildFacetToggleUrl(link);
+            if (!url) {
+                return;
+            }
+            applyLiveInputsToUrl(url);
+        } else {
+            const href = link.getAttribute('href');
+            if (!href) {
+                return;
+            }
+            url = new URL(href, window.location.origin);
+            if (!shouldHandleCatalogUrl(url)) {
+                return;
+            }
+        }
+        e.preventDefault();
+        const preserveFacetCounts = !!link.closest('[data-ajax-category-panel], [data-ajax-tag-panel]');
+        fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts });
+    });
+
+    const initAutocomplete = () => {
+        const input = document.querySelector('[data-autocomplete-input]');
+        const list = document.querySelector('[data-autocomplete-results]');
+        const clearBtn = document.querySelector('[data-main-search-clear]');
+        if (!input || !list) {
+            return;
+        }
+
+        const endpoint = input.dataset.autocompleteEndpoint;
+        const minQueryLen = Math.max(1, Number.parseInt(input.dataset.minQueryLen || '2', 10) || 2);
+        let suggestController = null;
+        let suggestDebounce = null;
+        let liveSearchDebounce = null;
+        const wrapper = input.closest('.autocomplete');
+        const syncClearButton = () => {
+            const hasValue = input.value.trim() !== '';
+            if (wrapper instanceof HTMLElement) {
+                wrapper.classList.toggle('has-value', hasValue);
+            }
+            if (!(clearBtn instanceof HTMLButtonElement)) {
+                return;
+            }
+            clearBtn.classList.toggle('is-visible', hasValue);
+            clearBtn.disabled = !hasValue;
+        };
+
+        const hideList = () => {
+            list.hidden = true;
+            list.innerHTML = '';
+        };
+
+        const renderSuggestions = (payload) => {
+            const suggestData = payload?.suggestions?.suggest?.data ?? [];
+            const qSuggestData = payload?.suggestions?.qsuggest?.data ?? [];
+            const combined = [...suggestData, ...qSuggestData]
+                .map(item => item?.suggestion ?? item?.token ?? '')
+                .filter(Boolean);
+            const unique = Array.from(new Set(combined)).slice(0, 8);
+            if (!unique.length) {
+                hideList();
+                return;
+            }
+            list.innerHTML = '';
+            unique.forEach(text => {
+                const li = document.createElement('li');
+                li.tabIndex = 0;
+                li.textContent = text;
+                const apply = () => {
+                    input.value = text;
+                    syncClearButton();
+                    hideList();
+                    const url = new URL(lastCatalogUrl.toString(), window.location.origin);
+                    applyLiveInputsToUrl(url, 'dom');
+                    const hasActiveFacetFilters =
+                        getFacetSelectionOrderFromDom('[data-ajax-category-panel]').length > 0
+                        || getFacetSelectionOrderFromDom('[data-ajax-tag-panel]').length > 0;
+                    fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts: hasActiveFacetFilters });
+                };
+                li.addEventListener('mousedown', (evt) => {
+                    evt.preventDefault();
+                    apply();
+                });
+                li.addEventListener('keydown', (evt) => {
+                    if (evt.key === 'Enter') {
+                        evt.preventDefault();
+                        apply();
+                    }
+                });
+                list.appendChild(li);
+            });
+            list.hidden = false;
+        };
+
+        const fetchSuggestions = (term) => {
+            if (!endpoint) {
+                return;
+            }
+            if (suggestController) {
+                suggestController.abort();
+            }
+            suggestController = new AbortController();
+            const url = new URL(endpoint, window.location.origin);
+            url.searchParams.set('term', term);
+            url.searchParams.set('limit', '5');
+            fetch(url.toString(), { signal: suggestController.signal })
+                .then(res => res.ok ? res.json() : Promise.reject(new Error('Failed to fetch suggestions')))
+                .then(renderSuggestions)
+                .catch(() => hideList());
+        };
+        const triggerLiveSearch = (delayMs = 260) => {
+            if (liveSearchDebounce) {
+                clearTimeout(liveSearchDebounce);
+            }
+            liveSearchDebounce = setTimeout(() => {
+                const term = input.value.trim();
+                if (term !== '' && term.length < minQueryLen) {
+                    return;
+                }
+                const url = new URL(lastCatalogUrl.toString(), window.location.origin);
+                applyLiveInputsToUrl(url, 'dom');
+                url.searchParams.set('page', '1');
+                fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts: true });
+            }, delayMs);
+        };
+
+        input.addEventListener('input', () => {
+            const term = input.value.trim();
+            syncClearButton();
+            triggerLiveSearch();
+            if (term.length < minQueryLen) {
+                hideList();
+                return;
+            }
+            if (suggestDebounce) {
+                clearTimeout(suggestDebounce);
+            }
+            suggestDebounce = setTimeout(() => fetchSuggestions(term), 200);
+        });
+        input.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Enter') {
+                hideList();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(hideList, 150);
+        });
+        if (clearBtn instanceof HTMLButtonElement) {
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                syncClearButton();
+                hideList();
+                input.focus({ preventScroll: true });
+                const url = new URL(lastCatalogUrl.toString(), window.location.origin);
+                applyLiveInputsToUrl(url, 'dom');
+                fetchAndReplaceCatalog(url.toString(), { preserveFacetCounts: false });
+            });
+        }
+        syncClearButton();
+    };
+
+    const sanitizeFacetLabels = () => {
+        const labels = document.querySelectorAll('.facet-name');
+        labels.forEach((node) => {
+            if (!(node instanceof HTMLElement)) {
+                return;
+            }
+            const text = node.textContent || '';
+            const cleaned = text.replace(/^[A-Za-z]\.\s+/, '').trimStart();
+            if (cleaned !== text) {
+                node.textContent = cleaned;
+            }
+        });
+    };
+
+    const initSortInteractions = () => {
+        const sortTableBody = document.querySelector('[data-sort-table-body]');
+        const searchForm = document.querySelector('.search-card form');
+        if (!sortTableBody || !searchForm) {
+            return;
+        }
+
+        const submitSearchForm = () => {
+            if (typeof searchForm.requestSubmit === 'function') {
+                searchForm.requestSubmit();
+                return;
+            }
+            searchForm.submit();
+        };
+
+        let draggingRow = null;
+        const getDragAfterElement = (container, y) => {
+            const rows = [...container.querySelectorAll('tr:not(.dragging)')];
+            let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+            rows.forEach((row) => {
+                const box = row.getBoundingClientRect();
+                const offset = y - box.top - (box.height / 2);
+                if (offset < 0 && offset > closest.offset) {
+                    closest = { offset, element: row };
+                }
+            });
+            return closest.element;
+        };
+
+        sortTableBody.querySelectorAll('tr[draggable="true"]').forEach((row) => {
+            row.addEventListener('dragstart', () => {
+                draggingRow = row;
+                row.classList.add('dragging');
+            });
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                draggingRow = null;
+                submitSearchForm();
+            });
+        });
+
+        sortTableBody.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!draggingRow) {
+                return;
+            }
+            const after = getDragAfterElement(sortTableBody, e.clientY);
+            if (!after) {
+                sortTableBody.appendChild(draggingRow);
+                return;
+            }
+            sortTableBody.insertBefore(draggingRow, after);
+        });
+
+        sortTableBody.addEventListener('change', (e) => {
+            const target = e.target;
+            if (!(target instanceof HTMLInputElement)) {
+                return;
+            }
+            if (target.type === 'radio' && target.name.startsWith('order_by_field[')) {
+                submitSearchForm();
+            }
+        });
+    };
+
+    const initFilterAutoSubmit = () => {
+        const filterForm = document.querySelector('.panel form');
+        if (!filterForm) {
+            return;
+        }
+        const inputs = filterForm.querySelectorAll('.filters-grid input');
+        if (!inputs.length) {
+            return;
+        }
+        let debounce = null;
+        const submitForm = () => {
+            const url = new URL(lastCatalogUrl.toString());
+            url.searchParams.set('page', '1');
+            const sortSelect = document.querySelector('[data-catalog-sort-select]');
+            if (sortSelect instanceof HTMLSelectElement) {
+                applySortSelectionToUrl(url, sortSelect.value);
+            }
+
+            // Keep current query text if user has edited it but not submitted yet.
+            const searchInput = document.querySelector('[data-autocomplete-input]');
+            if (searchInput instanceof HTMLInputElement) {
+                const q = searchInput.value.trim();
+                if (q === '') {
+                    url.searchParams.delete('q');
+                } else {
+                    url.searchParams.set('q', q);
+                }
+            }
+
+            // Replace only filter params from live form inputs.
+            const filterKeys = [
+                'price_min',
+                'price_max',
+                'release_year_min',
+                'release_year_max',
+                'player_count_min',
+                'player_count_max',
+                'play_time_min',
+                'play_time_max',
+            ];
+            const isNeutralFilterInput = (input) => {
+                if (!(input instanceof HTMLInputElement)) {
+                    return true;
+                }
+                const value = input.value.trim();
+                if (value === '') {
+                    return true;
+                }
+                const neutral = input.dataset.neutral;
+                return typeof neutral === 'string' && neutral !== '' && value === neutral;
+            };
+            filterKeys.forEach((key) => url.searchParams.delete(key));
+            inputs.forEach((input) => {
+                if (!(input instanceof HTMLInputElement) || !input.name) {
+                    return;
+                }
+                if (!filterKeys.includes(input.name)) {
+                    return;
+                }
+                if (!isNeutralFilterInput(input)) {
+                    url.searchParams.set(input.name, input.value.trim());
+                }
+            });
+
+            fetchAndReplaceCatalog(url.toString());
+        };
+
+        inputs.forEach((input) => {
+            input.addEventListener('input', () => {
+                if (debounce) {
+                    clearTimeout(debounce);
+                }
+                debounce = setTimeout(submitForm, 250);
+            });
+            input.addEventListener('change', submitForm);
+        });
+    };
+    const initRangeSliders = () => {
+        const pairs = document.querySelectorAll('.filters-grid [data-range-pair]');
+        pairs.forEach((pair) => {
+            const minInput = pair.querySelector('input[type="range"][data-range-role="min"]');
+            const maxInput = pair.querySelector('input[type="range"][data-range-role="max"]');
+            if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) {
+                return;
+            }
+            const targetId = minInput.dataset.rangeValueTarget || maxInput.dataset.rangeValueTarget || '';
+            const target = targetId ? document.getElementById(targetId) : null;
+            const track = pair.querySelector('.range-dual');
+            const minBound = Number.parseFloat(minInput.min || '0');
+            const maxBound = Number.parseFloat(maxInput.max || '100');
+            const span = Math.max(1, maxBound - minBound);
+
+            const render = (sourceInput = null) => {
+                let minVal = Number.parseFloat(minInput.value || String(minBound));
+                let maxVal = Number.parseFloat(maxInput.value || String(maxBound));
+                if (minVal > maxVal) {
+                    if (sourceInput === maxInput) {
+                        minVal = maxVal;
+                    } else {
+                        maxVal = minVal;
+                    }
+                }
+                minInput.value = String(minVal);
+                maxInput.value = String(maxVal);
+
+                if (target) {
+                    target.textContent = `${minInput.value} - ${maxInput.value}`;
+                }
+                if (track instanceof HTMLElement) {
+                    const start = ((minVal - minBound) / span) * 100;
+                    const end = ((maxVal - minBound) / span) * 100;
+                    track.style.setProperty('--range-start', `${start}%`);
+                    track.style.setProperty('--range-end', `${end}%`);
+                }
+            };
+
+            render();
+            minInput.addEventListener('input', () => render(minInput));
+            maxInput.addEventListener('input', () => render(maxInput));
+            minInput.addEventListener('change', () => render(minInput));
+            maxInput.addEventListener('change', () => render(maxInput));
+        });
+    };
+    const initFacetLiveSearch = () => {
+        const bind = (selector) => {
+            const panel = document.querySelector(selector);
+            if (!panel) {
+                return;
+            }
+            const input = panel.querySelector('[data-facet-search]');
+            const list = panel.querySelector('.facet-list');
+            const clearBtn = panel.querySelector('[data-facet-search-clear]');
+            if (!(input instanceof HTMLInputElement) || !(list instanceof HTMLElement)) {
+                return;
+            }
+            if (input.dataset.liveSearchBound === '1') {
+                return;
+            }
+            const applyFilter = () => {
+                const term = input.value.trim().toLowerCase();
+                const rows = list.querySelectorAll('.facet-row');
+                rows.forEach((row) => {
+                    if (!(row instanceof HTMLElement)) {
+                        return;
+                    }
+                    if (term === '') {
+                        row.hidden = false;
+                        return;
+                    }
+                    const nameNode = row.querySelector('.facet-name');
+                    const text = (nameNode?.textContent || '').toLowerCase();
+                    row.hidden = !text.includes(term);
+                });
+                if (clearBtn instanceof HTMLButtonElement) {
+                    const hasValue = term !== '';
+                    clearBtn.classList.toggle('is-visible', hasValue);
+                    clearBtn.disabled = !hasValue;
+                }
+            };
+            input.addEventListener('input', applyFilter);
+            if (clearBtn instanceof HTMLButtonElement) {
+                clearBtn.addEventListener('click', () => {
+                    input.value = '';
+                    applyFilter();
+                    input.focus({ preventScroll: true });
+                });
+            }
+            input.dataset.liveSearchBound = '1';
+            applyFilter();
+        };
+        bind('[data-ajax-category-panel]');
+        bind('[data-ajax-tag-panel]');
+    };
+
+    const initMainWidgets = () => {
+        sanitizeFacetLabels();
+        syncFacetUiFromUrl();
+        initAutocomplete();
+        initSortInteractions();
+        initFilterAutoSubmit();
+        initRangeSliders();
+        initFacetLiveSearch();
+    };
+
+    initMainWidgets();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Catalog Admin – Import</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --surface: #fff;
+            --text: #1f2d3d;
+            --muted: #6f8398;
+            --border: #d3deeb;
+            --accent-soft: #edf6e8;
+            --accent-strong: #3f7d23;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        main.shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 1rem 1rem 1.25rem;
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 0.72rem;
+            background: var(--surface);
+            padding: 0.46rem 0.72rem;
+        }
+
+        .brand {
+            margin: 0;
+            font-weight: 700;
+            color: #344f6e;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+        }
+
+        .crumb {
+            color: var(--muted);
+            font-size: 0.86rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .topnav {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-self: end;
+        }
+
+        .topnav a {
+            text-decoration: none;
+            color: #3c526d;
+            padding: 0.34rem 0.62rem;
+            border: 1px solid var(--border);
+            border-radius: 0.48rem;
+            background: #fff;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+        }
+
+        .topnav a:hover {
+            background: #f1f5fa;
+            border-color: #c9d5e3;
+        }
+
+        .topnav a[aria-current="page"] {
+            background: var(--accent-soft);
+            border-color: #bad8a6;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .topnav .is-disabled {
+            text-decoration: none;
+            color: #8a99ab;
+            padding: 0.34rem 0.62rem;
+            border: 1px solid #dde4ee;
+            border-radius: 0.48rem;
+            background: #f4f7fb;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+            cursor: not-allowed;
+        }
+
+        h1 {
+            margin: 0 0 0.72rem;
+            font-size: 1.28rem;
+            color: #2e4663;
+        }
+
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.78rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-card h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1rem;
+            color: #2f4a69;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select,
+        textarea {
+            min-height: 1.75rem;
+            height: 1.75rem;
+            padding: 0.18rem 0.46rem;
+            font-size: 0.8rem;
+            border-radius: 0.42rem;
+        }
+
+        textarea {
+            height: auto;
+            min-height: 4.2rem;
+        }
+
+        input[type="file"]::file-selector-button {
+            min-height: 1.55rem;
+            height: 1.55rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 0.42rem;
+            border: 1px solid #c9d5e3;
+            background: #f7faff;
+            color: #3f5a7a;
+            font-size: 0.78rem;
+            margin-right: 0.42rem;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            min-height: 1.55rem;
+            height: 1.55rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 0.42rem;
+            border: 1px solid #c9d5e3;
+            background: #f7faff;
+            color: #3f5a7a;
+            font-size: 0.78rem;
+            margin-right: 0.42rem;
+        }
+
+        .flash { margin-bottom: 0.7rem; padding: 0.62rem 0.72rem; border-radius: 0.56rem; font-size: 0.84rem; }
+        .flash.success { background: #e8f4e2; color: #2d642f; border: 1px solid #c8dfb9; }
+        .flash.error { background: #fdecea; color: #5c2c2c; border: 1px solid #efc8c2; }
+
+        table { width: 100%; font-size: 0.84rem; border-collapse: collapse; }
+        table th, table td { border-bottom: 1px solid #e3ebf4; padding: 0.44rem 0.36rem; }
+        table th { color: #6f859f; font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        table tbody tr:hover { background: #f8fbff; }
+
+        form button[type="submit"] {
+            min-height: 1.75rem;
+            height: auto;
+            line-height: 1.2;
+            border-radius: 0.5rem;
+            padding: 0.18rem 0.54rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .danger-zone .danger-btn {
+            background: #b8322a;
+            color: #fff;
+            border: none;
+            min-height: 1.75rem;
+            height: auto;
+            line-height: 1.2;
+            padding: 0.18rem 0.54rem;
+            border-radius: 0.5rem;
+        }
+
+        .danger-zone {
+            border: 1px solid #c0392b;
+            padding: 0.85rem;
+            border-radius: 0.66rem;
+            background: #fdecea;
+            color: #5c2c2c;
+            margin-top: 0.6rem;
+        }
+
+        .danger-zone h3 {
+            margin-top: 0;
+            margin-bottom: 0.42rem;
+            font-size: 0.96rem;
+        }
+
+        .section-divider {
+            height: 1px;
+            border: 0;
+            background: #e3ebf4;
+            margin: 0.85rem 0;
+        }
+
+        .pager {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .pager a {
+            text-decoration: none;
+            color: #486582;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+        }
+
+        .pager a:hover {
+            text-decoration: underline;
+        }
+
+        .fake-file-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.15rem;
+        }
+
+        .fake-file-control button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.55rem;
+            height: 1.55rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 0.42rem;
+            border: 1px solid #c9d5e3;
+            background: #f2f5f9;
+            color: #60768f;
+            font-size: 0.78rem;
+            line-height: 1;
+            margin: 0;
+            cursor: not-allowed;
+        }
+
+        .fake-file-name {
+            display: inline-flex;
+            align-items: center;
+            min-height: 1.55rem;
+            font-size: 0.8rem;
+            line-height: 1;
+            margin: 0;
+            color: #4a5f78;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            word-break: break-all;
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 0.55rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.4rem;
+        }
+
+        .upload-actions a[role="button"] {
+            min-height: 1.75rem;
+            border-radius: 0.5rem;
+            padding: 0.18rem 0.54rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .import-progress-wrap {
+            display: none;
+            margin-top: 0.55rem;
+            padding: 0.6rem 0.68rem;
+            border: 1px solid #c8dfb9;
+            background: #eef7e8;
+            color: #2d642f;
+            border-radius: 0.56rem;
+        }
+
+        .import-progress-wrap.active {
+            display: block;
+        }
+
+        .import-progress-wrap progress {
+            width: 100%;
+            height: 0.72rem;
+            margin: 0 0 0.32rem;
+        }
+
+        .import-progress-text {
+            font-size: 0.8rem;
+            color: #2f4e2c;
+        }
+
+        .import-progress-wrap.error {
+            border-color: #efc8c2;
+            background: #fdecea;
+            color: #5c2c2c;
+        }
+
+
+        @media (max-width: 900px) {
+            .topbar {
+                grid-template-columns: 1fr;
+                gap: 0.45rem;
+            }
+            .topnav {
+                justify-self: start;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <div class="topbar">
+        <p class="brand">Manticore Catalog Demo</p>
+        <div class="crumb">Admin Dashboard / Import</div>
+        <div class="topnav">
+            <a href="/">Catalog</a>
+            <a href="/admin/upload" aria-current="page">Admin Dashboard</a>
+            {% if manage_items_enabled %}
+                <a href="/admin/items" id="manage-items-nav">Manage Items</a>
+            {% else %}
+                <span id="manage-items-nav" class="is-disabled" aria-disabled="true" title="Import extra items from this page to unlock">Manage Items</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <h1>Catalog Import</h1>
+
+    {% if flash %}
+        <div class="flash {{ flash.type }}">{{ flash.message }}</div>
+    {% endif %}
+
+    <section class="section-card">
+        <section class="danger-zone">
+        <h3>Data reset</h3>
+        <p>Reset imported records and keep baseline catalog data untouched by removing rows with <code>id &gt; {{ base_max_id }}</code>.</p>
+        <form action="/admin/reset-uploaded" method="post" id="reset-form">
+            <button type="submit" id="reset-uploaded-submit" class="danger-btn" data-loading-label="Resetting…">Reset data</button>
+        </form>
+        <div id="reset-progress" class="flash error" style="display:none;">Uploaded data reset in progress…</div>
+        </section>
+
+        <hr class="section-divider">
+
+        {% set csvPrepared = prepared_files.csv ?? {'name': 'boardgames_part2.csv', 'path': '', 'exists': false} %}
+        {% set xmlPrepared = prepared_files.xml ?? {'name': 'boardgames_part2.xml', 'path': '', 'exists': false} %}
+        <form action="/admin/upload" method="post" enctype="multipart/form-data" id="import-form">
+            <label>
+                Feed type
+                <select name="feed_type" id="feed-type">
+                    <option value="csv">CSV</option>
+                    <option value="xml">XML</option>
+                </select>
+            </label>
+            <label>
+                Files
+                <div class="fake-file-control" aria-disabled="true">
+                    <button type="button" disabled>Choose file</button>
+                    <span id="prepared-file-name" class="fake-file-name">{{ csvPrepared.name }}</span>
+                </div>
+                <input type="file" name="feed[]" multiple disabled tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+            </label>
+            <div class="upload-actions">
+                <button
+                    type="submit"
+                    id="import-prepared-submit"
+                    data-loading-label="Importing…"
+                    {{ not csvPrepared.exists ? 'disabled' : '' }}
+                >Import selected file</button>
+                <a id="download-selected-file" href="/admin/upload/download?type=csv" role="button" class="secondary">Download selected file</a>
+            </div>
+        </form>
+        <div id="import-progress-wrap" class="import-progress-wrap" aria-live="polite">
+            <progress id="import-progress-bar" max="100" value="0"></progress>
+            <div id="import-progress-text" class="import-progress-text">Waiting to start…</div>
+        </div>
+    </section>
+
+</main>
+<script>
+    const forms = document.querySelectorAll('form');
+    const importForm = document.getElementById('import-form');
+    const feedType = document.getElementById('feed-type');
+    const preparedName = document.getElementById('prepared-file-name');
+    const resetForm = document.getElementById('reset-form');
+    const resetSubmit = document.getElementById('reset-uploaded-submit');
+    const manageItemsNav = document.getElementById('manage-items-nav');
+    const importProgressWrap = document.getElementById('import-progress-wrap');
+    const importProgressBar = document.getElementById('import-progress-bar');
+    const importProgressText = document.getElementById('import-progress-text');
+    const resetProgress = document.getElementById('reset-progress');
+    const importSubmit = document.getElementById('import-prepared-submit');
+    const preparedFiles = {
+        csv: {
+            name: {{ csvPrepared.name|json_encode|raw }},
+            exists: {{ csvPrepared.exists|json_encode|raw }},
+            rows: {{ (csvPrepared.rows ?? 0)|json_encode|raw }}
+        },
+        xml: {
+            name: {{ xmlPrepared.name|json_encode|raw }},
+            exists: {{ xmlPrepared.exists|json_encode|raw }},
+            rows: {{ (xmlPrepared.rows ?? 0)|json_encode|raw }}
+        }
+    };
+    const downloadLink = document.getElementById('download-selected-file');
+    const importBatchSize = {{ (import_batch_size ?? 100)|json_encode|raw }};
+    let importBusy = false;
+    let resetBusy = false;
+
+    forms.forEach((form) => {
+        form.addEventListener('submit', () => {
+            document.querySelectorAll('.flash').forEach((el) => {
+                if (!el.contains(form)) {
+                    el.remove();
+                }
+            });
+        });
+    });
+
+    function attachProgress(form, progressEl) {
+        if (!form || !progressEl) {
+            return;
+        }
+        form.addEventListener('submit', () => {
+            progressEl.style.display = 'block';
+            const submit = form.querySelector('button[type="submit"]');
+            if (submit) {
+                submit.disabled = true;
+                const label = submit.getAttribute('data-loading-label');
+                if (label) {
+                    submit.dataset.originalText = submit.textContent;
+                    submit.textContent = label;
+                }
+            }
+        });
+    }
+
+    function updatePreparedFilePreview() {
+        if (!feedType || !preparedName) {
+            return;
+        }
+        const selected = feedType.value === 'xml' ? 'xml' : 'csv';
+        const meta = preparedFiles[selected] || preparedFiles.csv;
+        preparedName.textContent = meta.name || '';
+        if (importSubmit && !importBusy && !resetBusy) {
+            importSubmit.disabled = !meta.exists;
+        }
+        if (downloadLink) {
+            if (meta.exists) {
+                downloadLink.href = '/admin/upload/download?type=' + encodeURIComponent(selected);
+                downloadLink.removeAttribute('aria-disabled');
+                downloadLink.style.pointerEvents = '';
+                downloadLink.style.opacity = '';
+            } else {
+                downloadLink.href = '#';
+                downloadLink.setAttribute('aria-disabled', 'true');
+                downloadLink.style.pointerEvents = 'none';
+                downloadLink.style.opacity = '0.6';
+            }
+        }
+        updateControlLocks();
+    }
+
+    function setImportSubmitLoading(isLoading) {
+        importBusy = isLoading;
+        if (!importSubmit) {
+            updateControlLocks();
+            return;
+        }
+        if (isLoading) {
+            importSubmit.disabled = true;
+            const label = importSubmit.getAttribute('data-loading-label');
+            if (label) {
+                importSubmit.dataset.originalText = importSubmit.textContent || '';
+                importSubmit.textContent = label;
+            }
+            updateControlLocks();
+            return;
+        }
+        const original = importSubmit.dataset.originalText;
+        if (original) {
+            importSubmit.textContent = original;
+            delete importSubmit.dataset.originalText;
+        }
+        updatePreparedFilePreview();
+        updateControlLocks();
+    }
+
+    function setResetSubmitLoading(isLoading) {
+        resetBusy = isLoading;
+        if (!resetSubmit) {
+            updateControlLocks();
+            return;
+        }
+        if (isLoading) {
+            resetSubmit.disabled = true;
+            const label = resetSubmit.getAttribute('data-loading-label');
+            if (label) {
+                resetSubmit.dataset.originalText = resetSubmit.textContent || '';
+                resetSubmit.textContent = label;
+            }
+            updateControlLocks();
+            return;
+        }
+        const original = resetSubmit.dataset.originalText;
+        if (original) {
+            resetSubmit.textContent = original;
+            delete resetSubmit.dataset.originalText;
+        }
+        updateControlLocks();
+    }
+
+    function updateControlLocks() {
+        const selected = feedType && feedType.value === 'xml' ? 'xml' : 'csv';
+        const meta = preparedFiles[selected] || preparedFiles.csv;
+        if (importSubmit) {
+            importSubmit.disabled = resetBusy || importBusy || !meta.exists;
+        }
+        if (resetSubmit) {
+            resetSubmit.disabled = importBusy || resetBusy;
+        }
+        if (feedType) {
+            feedType.disabled = importBusy || resetBusy;
+        }
+        if (downloadLink) {
+            if (importBusy || resetBusy || !meta.exists) {
+                downloadLink.setAttribute('aria-disabled', 'true');
+                downloadLink.style.pointerEvents = 'none';
+                downloadLink.style.opacity = '0.6';
+            } else {
+                downloadLink.removeAttribute('aria-disabled');
+                downloadLink.style.pointerEvents = '';
+                downloadLink.style.opacity = '';
+            }
+        }
+    }
+
+    function setImportProgress(processed, total, message) {
+        if (!importProgressWrap || !importProgressBar || !importProgressText) {
+            return;
+        }
+        const safeTotal = Math.max(1, Number(total) || 1);
+        const safeProcessed = Math.max(0, Math.min(Number(processed) || 0, safeTotal));
+        importProgressWrap.classList.add('active');
+        importProgressWrap.classList.remove('error');
+        importProgressBar.max = safeTotal;
+        importProgressBar.value = safeProcessed;
+        importProgressText.textContent = message || (`Items imported: ${safeProcessed}/${safeTotal}`);
+    }
+
+    function showImportError(message) {
+        if (!importProgressWrap || !importProgressText) {
+            return;
+        }
+        importProgressWrap.classList.add('active', 'error');
+        importProgressText.textContent = message;
+    }
+
+    function hideImportProgress() {
+        if (!importProgressWrap || !importProgressBar || !importProgressText) {
+            return;
+        }
+        importProgressWrap.classList.remove('active', 'error');
+        importProgressBar.value = 0;
+        importProgressText.textContent = 'Waiting to start…';
+    }
+
+    function unlockManageItemsNav() {
+        if (!(manageItemsNav instanceof HTMLElement) || manageItemsNav.tagName.toLowerCase() === 'a') {
+            return;
+        }
+        const link = document.createElement('a');
+        link.id = 'manage-items-nav';
+        link.href = '/admin/items';
+        link.textContent = 'Manage Items';
+        manageItemsNav.replaceWith(link);
+    }
+
+    function prependFlash(type, message) {
+        const main = document.querySelector('main.shell');
+        const h1 = main ? main.querySelector('h1') : null;
+        if (!main || !h1) {
+            return;
+        }
+        const existing = main.querySelector('.flash');
+        if (existing) {
+            existing.remove();
+        }
+        const flash = document.createElement('div');
+        flash.className = `flash ${type}`;
+        flash.textContent = message;
+        h1.insertAdjacentElement('afterend', flash);
+    }
+
+    if (feedType) {
+        feedType.addEventListener('change', updatePreparedFilePreview);
+    }
+    updatePreparedFilePreview();
+
+    attachProgress(resetForm, resetProgress);
+    if (resetForm) {
+        resetForm.addEventListener('submit', () => {
+            setResetSubmitLoading(true);
+        });
+    }
+
+    if (importForm && feedType) {
+        importForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const selected = feedType.value === 'xml' ? 'xml' : 'csv';
+            const meta = preparedFiles[selected] || preparedFiles.csv;
+            if (!meta.exists) {
+                showImportError('Selected prepared fixture file is not available on this server.');
+                return;
+            }
+
+            const totalRows = Math.max(1, Number(meta.rows) || 0);
+            const batchSize = Math.max(1, Number(importBatchSize) || 100);
+            const batchTotal = Math.max(1, Math.ceil(totalRows / batchSize));
+            let batchCurrent = 0;
+            let offset = 0;
+            setImportProgress(0, totalRows, `Batch 0/${batchTotal} (0/${totalRows})`);
+            setImportSubmitLoading(true);
+
+            const runNextBatch = () => {
+                const url = '/admin/upload/import-stream'
+                    + '?type=' + encodeURIComponent(selected)
+                    + '&offset=' + encodeURIComponent(String(offset))
+                    + '&limit=' + encodeURIComponent(String(batchSize))
+                    + '&_ts=' + Date.now();
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then((res) => res.json().then((payload) => ({ ok: res.ok, payload })))
+                    .then(({ ok, payload }) => {
+                        if (!payload || typeof payload !== 'object') {
+                            throw new Error('Unexpected import response.');
+                        }
+                        if (!ok || payload.status !== 'ok') {
+                            throw new Error(payload.message || 'Import failed due to a server-side issue.');
+                        }
+
+                        const total = Math.max(1, Number(payload.total) || totalRows);
+                        const nextOffset = Math.max(offset, Number(payload.next_offset) || offset);
+                        const dynamicBatchTotal = Math.max(1, Math.ceil(total / batchSize));
+                        batchCurrent = Math.max(batchCurrent, Math.min(dynamicBatchTotal, Math.ceil(nextOffset / batchSize)));
+                        setImportProgress(nextOffset, total, `Batch ${batchCurrent}/${dynamicBatchTotal} (${nextOffset}/${total})`);
+
+                        if (payload.done === true || nextOffset >= total) {
+                            setImportSubmitLoading(false);
+                            hideImportProgress();
+                            unlockManageItemsNav();
+                            prependFlash('success', payload.message || 'Import complete.');
+                            return;
+                        }
+
+                        if (nextOffset <= offset) {
+                            throw new Error('Import progress stalled. Please try again.');
+                        }
+                        offset = nextOffset;
+                        runNextBatch();
+                    })
+                    .catch((error) => {
+                        setImportSubmitLoading(false);
+                        showImportError(error && error.message ? error.message : 'Import request failed. Please try again.');
+                        prependFlash('error', error && error.message ? error.message : 'Import request failed. Please try again.');
+                    });
+            };
+
+            if (totalRows <= 0) {
+                setImportSubmitLoading(false);
+                showImportError('Prepared fixture has no importable records.');
+                return;
+            }
+
+            runNextBatch();
+        });
+    }
+    updateControlLocks();
+</script>
+</body>
+</html>

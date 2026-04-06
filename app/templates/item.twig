@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item.title }} · {{ app.name }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --surface: #ffffff;
+            --text: #1f2d3d;
+            --muted: #6f8398;
+            --border: #d3deeb;
+            --accent: #5f9f36;
+            --accent-strong: #3f7d23;
+            --accent-soft: #edf6e8;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        main.shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 1rem 1rem 1.25rem;
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 0.72rem;
+            background: var(--surface);
+            padding: 0.46rem 0.72rem;
+        }
+
+        .brand {
+            margin: 0;
+            font-weight: 700;
+            color: #344f6e;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+        }
+
+        .crumb {
+            color: var(--muted);
+            font-size: 0.86rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .topnav {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-self: end;
+        }
+
+        .topnav a {
+            text-decoration: none;
+            color: #3c526d;
+            padding: 0.34rem 0.62rem;
+            border: 1px solid var(--border);
+            border-radius: 0.48rem;
+            background: #fff;
+            font-size: 0.85rem;
+        }
+
+        .topnav a:hover {
+            background: #f1f5fa;
+            border-color: #c9d5e3;
+        }
+
+        .topnav a[aria-current="page"] {
+            background: var(--accent-soft);
+            border-color: #bad8a6;
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .item-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0.95rem;
+            align-items: start;
+        }
+
+        .media-card,
+        .details-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.78rem;
+            padding: 0.75rem;
+        }
+
+        .media-card {
+            margin: 0;
+        }
+
+        .media-card img {
+            width: 100%;
+            border-radius: 0.62rem;
+            border: 1px solid #d8e2ef;
+            display: block;
+            object-fit: cover;
+            background: #f7f9fc;
+        }
+
+        .details-card h1 {
+            margin: 0 0 0.4rem;
+            font-size: 1.28rem;
+            line-height: 1.2;
+            color: #2e4663;
+        }
+
+        .details-card .description {
+            margin: 0 0 0.62rem;
+            color: #3e5878;
+            font-size: 0.9rem;
+            line-height: 1.44;
+        }
+
+        .price-row {
+            margin: 0 0 0.72rem;
+            font-size: 1rem;
+            color: #2f6f36;
+            font-weight: 700;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.56rem;
+        }
+
+        .meta-item {
+            border: 1px solid #d8e2ef;
+            border-radius: 0.56rem;
+            background: #fbfdff;
+            padding: 0.48rem 0.56rem;
+        }
+
+        .meta-item strong {
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #6f859f;
+            margin-bottom: 0.15rem;
+        }
+
+        .meta-item p {
+            margin: 0;
+            color: #3f5a7b;
+            font-size: 0.84rem;
+            line-height: 1.3;
+        }
+
+        .similar-toggle {
+            margin: 0.76rem 0 0;
+        }
+
+        .similar-toggle a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            text-decoration: none;
+            color: var(--accent-strong);
+            border: 1px solid #b7d3a4;
+            background: var(--accent-soft);
+            border-radius: 0.5rem;
+            padding: 0.34rem 0.56rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .similar-toggle a:hover {
+            background: #e5f1dd;
+        }
+
+        .similar-toggle a.is-loading {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .similar-section {
+            margin-top: 0.88rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.78rem;
+            padding: 0.76rem;
+        }
+
+        .similar-section h2 {
+            margin: 0 0 0.58rem;
+            font-size: 1rem;
+            color: #2f4a69;
+        }
+
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));
+            gap: 0.72rem;
+        }
+
+        .similar-card {
+            margin: 0;
+            border: 1px solid #d5dfeb;
+            border-radius: 0.76rem;
+            overflow: hidden;
+            background: #fff;
+            padding: 0.34rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+        }
+
+        .similar-card:hover {
+            transform: translateY(-2px);
+            border-color: #c3d2e4;
+            box-shadow: 0 8px 18px rgba(18, 36, 64, .10);
+        }
+
+        .similar-card img {
+            width: 100%;
+            height: 138px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border-bottom: 1px solid #dde6f0;
+            background: #f7f9fc;
+            display: block;
+        }
+
+        .similar-card-body {
+            padding: 0.54rem 0.54rem 0.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.34rem;
+            flex: 1 1 auto;
+        }
+
+        .similar-card h3 {
+            margin: 0;
+            font-size: 0.88rem;
+            line-height: 1.25;
+        }
+
+        .similar-card h3 a {
+            text-decoration: none;
+            color: #2f4d6f;
+        }
+
+        .similar-card h3 a:hover {
+            color: var(--accent-strong);
+        }
+
+        .similar-card .similar-desc {
+            margin: 0;
+            color: #667f9c;
+            font-size: 0.76rem;
+            line-height: 1.3;
+            min-height: 2.45rem;
+        }
+
+        .similar-card-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.42rem;
+            margin-top: auto;
+        }
+
+        .similar-card .price {
+            margin: 0;
+            color: #2f6f36;
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .similar-view-btn {
+            text-decoration: none;
+            background: var(--accent-soft);
+            border: 1px solid #b7d6a1;
+            color: var(--accent-strong);
+            padding: 0.19rem 0.48rem;
+            border-radius: 0.46rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .similar-view-btn:hover {
+            background: #e5f1dd;
+        }
+
+        @media (max-width: 900px) {
+            .topbar {
+                grid-template-columns: 1fr;
+                gap: 0.45rem;
+            }
+            .topnav {
+                justify-self: start;
+            }
+            .item-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <div class="topbar">
+        <p class="brand">{{ app.name }}</p>
+        <div class="crumb">{{ item.title }}</div>
+        <div class="topnav">
+            {% for link in menu %}
+                <a href="{{ link.href }}" aria-current="{{ link.active ? 'page' : 'false' }}">{{ link.label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="item-container">
+        <figure class="media-card">
+            {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.title }}">
+            {% else %}
+                <img src="/images/placeholder.png" alt="Placeholder">
+            {% endif %}
+        </figure>
+        <article class="details-card">
+            <h1>{{ item.title }}</h1>
+            <p class="description">{{ item.description }}</p>
+            <p class="price-row">{{ item.price is not null ? '$' ~ item.price|number_format(2, '.', ',') : 'N/A' }}</p>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <strong>Categories</strong>
+                    <p>{{ item.categories ?: '—' }}</p>
+                </div>
+                <div class="meta-item">
+                    <strong>Tags</strong>
+                    <p>{{ item.tags ?: '—' }}</p>
+                </div>
+                <div class="meta-item">
+                    <strong>Publisher</strong>
+                    <p>{{ item.publisher ?: 'Unknown' }}</p>
+                </div>
+                <div class="meta-item">
+                    <strong>Designer</strong>
+                    <p>{{ item.designer ?: 'Unknown' }}</p>
+                </div>
+                <div class="meta-item">
+                    <strong>Release Year</strong>
+                    <p>{{ item.release_year ?: '—' }}</p>
+                </div>
+                <div class="meta-item">
+                    <strong>Players</strong>
+                    <p>
+                        {% if item.player_count_min and item.player_count_max %}
+                            {{ item.player_count_min }} – {{ item.player_count_max }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="meta-item">
+                    <strong>Play Time (min)</strong>
+                    <p>{{ item.play_time_minutes ?: '—' }}</p>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <p class="similar-toggle">
+        <a href="?show_similar=1" data-show-similar-link>
+            {{ show_similar and similar ? 'Hide similar games' : 'Show similar games' }}
+        </a>
+    </p>
+
+    {% if show_similar and similar %}
+        <section class="similar-section">
+            <h2>Similar games</h2>
+            <div class="similar-grid">
+                {% for hit in similar %}
+                    <article class="similar-card">
+                        {% if hit.image_url %}
+                            <img src="{{ hit.image_url }}" alt="{{ hit.title }}">
+                        {% else %}
+                            <img src="/images/placeholder.png" alt="Placeholder">
+                        {% endif %}
+                        <div class="similar-card-body">
+                            <h3><a href="/items/{{ hit.id }}">{{ hit.title }}</a></h3>
+                            <p class="similar-desc">{{ hit.description|slice(0, 120) }}{% if hit.description|length > 120 %}…{% endif %}</p>
+                            <div class="similar-card-foot">
+                                <p class="price">{{ hit.price is not null ? '$' ~ hit.price|number_format(2, '.', ',') : 'N/A' }}</p>
+                                <a class="similar-view-btn" href="/items/{{ hit.id }}">View</a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const link = document.querySelector('[data-show-similar-link]');
+    if (!(link instanceof HTMLAnchorElement)) {
+        return;
+    }
+
+    const showLabel = 'Show similar games';
+    const hideLabel = 'Hide similar games';
+    let similarSection = document.querySelector('.similar-section');
+    let sectionLoaded = similarSection instanceof HTMLElement;
+    let sectionExpanded = sectionLoaded && !similarSection.hidden;
+    const setToggleState = (expanded) => {
+        sectionExpanded = expanded;
+        link.textContent = expanded ? hideLabel : showLabel;
+        if (similarSection instanceof HTMLElement) {
+            similarSection.hidden = !expanded;
+        }
+    };
+    setToggleState(sectionExpanded);
+
+    let requestController = null;
+    link.addEventListener('click', async (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') {
+            return;
+        }
+        event.preventDefault();
+
+        if (sectionExpanded) {
+            setToggleState(false);
+            return;
+        }
+
+        if (sectionLoaded && similarSection instanceof HTMLElement) {
+            setToggleState(true);
+            return;
+        }
+
+        const href = link.getAttribute('href');
+        if (!href) {
+            return;
+        }
+        const url = new URL(href, window.location.href);
+
+        if (requestController) {
+            requestController.abort();
+        }
+        requestController = new AbortController();
+        link.classList.add('is-loading');
+
+        try {
+            const response = await fetch(url.toString(), {
+                signal: requestController.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to load similar games');
+            }
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const nextSection = doc.querySelector('.similar-section');
+            if (!nextSection) {
+                throw new Error('Similar section is missing');
+            }
+
+            similarSection = document.querySelector('.similar-section');
+            if (similarSection) {
+                similarSection.replaceWith(nextSection);
+            } else {
+                const toggle = document.querySelector('.similar-toggle');
+                if (toggle) {
+                    toggle.insertAdjacentElement('afterend', nextSection);
+                }
+            }
+            similarSection = document.querySelector('.similar-section');
+            sectionLoaded = similarSection instanceof HTMLElement;
+            setToggleState(true);
+        } catch (error) {
+            if (error && error.name === 'AbortError') {
+                return;
+            }
+            window.location.assign(url.toString());
+        } finally {
+            link.classList.remove('is-loading');
+        }
+    });
+});
+</script>
+</body>
+</html>

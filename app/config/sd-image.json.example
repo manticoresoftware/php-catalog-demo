@@ -1,0 +1,13 @@
+{
+  "model_id": "runwayml/stable-diffusion-v1-5",
+  "device": "cuda",
+  "steps": 34,
+  "width": 512,
+  "height": 512,
+  "cfg_scale": 6.8,
+  "seed": null,
+  "chunk_size": 8,
+  "negative_prompt": "blurry, low quality, low contrast, washed colors, noisy background, duplicate objects, cropped box, distorted perspective, unreadable text, watermark, logo, deformed",
+  "runner": "/srv/demo/app/bin/sd-image-runner.py"
+}
+
