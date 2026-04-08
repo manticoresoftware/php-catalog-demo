@@ -2,6 +2,8 @@
 
 **Publicly available demo - [catalog.manticoresearch.com](https://catalog.manticoresearch.com/)**
 
+![Live search in demo](./live_search.gif)
+
 [Blogpost about this project](https://manticoresearch.com/blog/manticore-php-demo/)
 
 ## Docker installation (recommended)
