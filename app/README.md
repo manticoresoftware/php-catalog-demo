@@ -85,11 +85,74 @@ cd app
 php bin/bootstrap-demo.php
 ```
 
-Then start the app:
+### Background server
+
+From the repository root:
+
+```bash
+make serve
+make serve-status
+```
+
+Or without Make:
 
 ```bash
 cd app
-php -S localhost:8081 -t public
+mkdir -p storage/logs
+nohup php -S 127.0.0.1:8081 -t public >> storage/logs/php-server.log 2>&1 &
+echo $! > storage/php-server.pid
+```
+
+Stop or restart:
+
+```bash
+make serve-stop
+make serve-restart
+```
+
+Or manually:
+
+```bash
+kill "$(cat storage/php-server.pid)"
+rm -f storage/php-server.pid
+```
+
+The server reads `APP_HOST` and `APP_PORT` from `.env` when started via `make serve`. If you start it manually, pass the same host and port on the `php -S` command line.
+
+### Detect the app port
+
+Configured port:
+
+```bash
+grep -E '^APP_(HOST|PORT)=' .env
+```
+
+Actual port used by the running PHP server:
+
+```bash
+pgrep -af 'php -S'
+ss -tlnp | grep php
+```
+
+From the repository root:
+
+```bash
+make serve-status
+```
+
+If `curl http://127.0.0.1:8081/` returns `Connection refused`, check the commands above for the real port or start the server.
+
+### Foreground server
+
+```bash
+make serve-foreground
+```
+
+Or:
+
+```bash
+cd app
+php -S 127.0.0.1:8081 -t public
 ```
 
 Visit `http://APP_HOST:APP_PORT/` (defaults to `http://127.0.0.1:8081/`).

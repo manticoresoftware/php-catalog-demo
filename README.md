@@ -8,6 +8,22 @@
 
 ## Docker installation (recommended)
 
+**Option A: Makefile shortcuts**
+
+```bash
+cd <repo-root>
+make up
+cp app/.env.example app/.env
+make install
+make bootstrap
+make serve
+make serve-status
+make serve-stop
+make serve-restart
+```
+
+**Option B: shell commands (no Make)**
+
 ```bash
 cd <repo-root>
 docker compose up -d
@@ -16,25 +32,37 @@ cp app/.env.example app/.env
 cd app
 composer install
 php bin/bootstrap-demo.php
-php -S localhost:8081 -t public
+
+mkdir -p storage/logs
+nohup php -S 127.0.0.1:8081 -t public >> storage/logs/php-server.log 2>&1 &
+echo $! > storage/php-server.pid
 ```
 
 This repository's `compose.yaml` starts the Manticore service in Docker.  
-The PHP app itself is run locally via the built-in PHP server.
+The PHP app itself is run via the built-in PHP server.
 
 `php bin/bootstrap-demo.php` recreates the table and loads demo records from fixtures.
 
-### Optional: Makefile shortcuts
+### PHP server management
 
-If you prefer shorter commands, this repository also provides `Makefile` targets:
+`make serve` reads `APP_HOST` and `APP_PORT` from `app/.env` (defaults to `127.0.0.1:8081`), writes a PID file to `app/storage/php-server.pid`, and logs to `app/storage/logs/php-server.log`.
+
+Check status without Make:
 
 ```bash
-cd <repo-root>
-make up
-make install
-make bootstrap
-make serve
+kill -0 "$(cat app/storage/php-server.pid)" && echo "running" || echo "not running"
+curl http://127.0.0.1:8081/
 ```
+
+Stop without Make:
+
+```bash
+kill "$(cat app/storage/php-server.pid)"
+rm -f app/storage/php-server.pid
+```
+
+Replace `127.0.0.1:8081` with the values from `app/.env` if you changed them.
+
 
 ## Running the demo locally
 
