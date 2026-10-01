@@ -3,7 +3,7 @@
 
 app/vendor/
 app/storage/logs/*.log
-app/storage/php-server.pid
+app/storage/state/
 app/public/images/uploads/*
 fixtures/output/*
 

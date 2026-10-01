@@ -1,25 +1,49 @@
 # Catalog Demo Application
 
-## Requirements
+The recommended way to run this app is Docker Compose from the repository root:
 
-- PHP 8.1+ CLI with `ext-curl`, `ext-gd`, and other standard extensions enabled
-- Composer
+```bash
+docker compose up -d
+```
 
-## Dependency Installation
+See the [root README](../README.md) for install, ports, logs, and restart behavior.
 
-From the repository root:
+## Requirements (Docker)
+
+- Docker and Docker Compose
+
+## Optional: local PHP tooling
+
+Fixture generation and one-off scripts can still be run on the host if you have PHP 8.1+ and Composer installed.
+
+### Dependency installation (host)
 
 ```bash
 cd app
 composer install
 ```
 
-## Fixtures generation
+### Environment (host)
+
+Compose sets `MANTICORE_HOST` / `MANTICORE_PORT` for the app container. For host-side scripts talking to Compose Manticore:
+
+```bash
+cp .env.example .env
+```
+
+Default Compose networking uses:
+
+```
+MANTICORE_HOST=127.0.0.1
+MANTICORE_PORT=9308
+```
+
+### Fixtures generation
 
 If you need to regenerate the catalog fixtures:
 
 The generator creates split datasets: `boardgames_part1.*` and `boardgames_part2.*`.
-This supports the demo workflow: part1 is the baseline catalog loaded on bootstrap, while part2 is reserved for admin imports and periodic cleanup/reset.
+This supports the demo workflow: part1 is the baseline catalog loaded on first container start, while part2 is reserved for admin imports and periodic cleanup/reset.
 
 Use `--split-at=<id>` to set the split boundary (`part1: id <= split-at`, `part2: id > split-at`) and control their relative sizes.
 
@@ -32,6 +56,11 @@ php bin/generate-boardgame-fixtures.php \
   --output-dir=storage/catalog
 ```
 
+Rebuild the app image afterward so the container picks up new fixtures:
+
+```bash
+docker compose up -d --build
+```
 
 ### Image generation
 
@@ -62,102 +91,21 @@ php bin/generate-boardgame-fixtures.php \
   --output-dir=storage/catalog \
   --images-dir=public/images/fixtures \
   --sd-config=config/sd-image.json.example \
-  --sd-python=/path/to/python3/on/your/machine \
+  --sd-python=/path/to/python3/on/your-machine \
   --keep-images
 ```
 
-## Environment
-
-Create `.env` from template (optional, defaults are used if unset):
+### Manual bootstrap / cleanup inside Docker
 
 ```bash
-cp .env.example .env
+# Re-import baseline fixtures (destructive to catalog tables)
+docker compose exec app php bin/bootstrap-demo.php
+
+# Cleanup uploaded demo rows (keeps baseline catalog)
+docker compose exec app php bin/cleanup-demo-uploaded.php
 ```
 
-Set `APP_HOST`, `APP_PORT`, `MANTICORE_HOST`, and `MANTICORE_PORT` as needed.
-
-## Running
-
-Before starting the PHP server, initialize the table and load demo data:
-
-```bash
-cd app
-php bin/bootstrap-demo.php
-```
-
-### Background server
-
-From the repository root:
-
-```bash
-make serve
-make serve-status
-```
-
-Or without Make:
-
-```bash
-cd app
-mkdir -p storage/logs
-nohup php -S 127.0.0.1:8081 -t public >> storage/logs/php-server.log 2>&1 &
-echo $! > storage/php-server.pid
-```
-
-Stop or restart:
-
-```bash
-make serve-stop
-make serve-restart
-```
-
-Or manually:
-
-```bash
-kill "$(cat storage/php-server.pid)"
-rm -f storage/php-server.pid
-```
-
-The server reads `APP_HOST` and `APP_PORT` from `.env` when started via `make serve`. If you start it manually, pass the same host and port on the `php -S` command line.
-
-### Detect the app port
-
-Configured port:
-
-```bash
-grep -E '^APP_(HOST|PORT)=' .env
-```
-
-Actual port used by the running PHP server:
-
-```bash
-pgrep -af 'php -S'
-ss -tlnp | grep php
-```
-
-From the repository root:
-
-```bash
-make serve-status
-```
-
-If `curl http://127.0.0.1:8081/` returns `Connection refused`, check the commands above for the real port or start the server.
-
-### Foreground server
-
-```bash
-make serve-foreground
-```
-
-Or:
-
-```bash
-cd app
-php -S 127.0.0.1:8081 -t public
-```
-
-Visit `http://APP_HOST:APP_PORT/` (defaults to `http://127.0.0.1:8081/`).
-
-### Demo Search UI
+## Demo Search UI
 
 - Full-text search is the default retrieval mode, with optional fuzzy matching for tolerant typo handling.
 - Hybrid retrieval is enabled for query searches by combining text + vector retrieval (RRF fusion) on the first page.
@@ -167,9 +115,7 @@ Visit `http://APP_HOST:APP_PORT/` (defaults to `http://127.0.0.1:8081/`).
 - Numeric filters (`price`, `release_year`, `play_time_minutes`, `player_count_min/max`) and user-selected sorting are supported.
 - Results cards include preview images and link to detail pages with full metadata and similar-item recommendations.
 
-### Admin upload panel
+## Admin upload panel
 
 Open http://localhost:8081/admin/upload to import prepared CSV/XML feeds (generated via the fixtures script) into the `catalog_board_games` table.
 Use the optional “Reset uploaded data” button to remove demo-uploaded records above the cutoff derived from `storage/catalog/boardgames_part1.csv` (fallback: `boardgames_part1.xml`) while keeping the base catalog intact.
-
-

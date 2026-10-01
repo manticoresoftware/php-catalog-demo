@@ -1,0 +1,13 @@
+.git
+.vscode
+.project
+*.md
+live_search.gif
+fixtures
+app/vendor
+app/storage/logs
+app/storage/imports
+app/storage/state
+app/public/images/uploads
+app/.env
+**/php-server.pid

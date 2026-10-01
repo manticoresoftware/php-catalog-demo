@@ -1,10 +1,40 @@
 services:
   manticore:
     image: manticoresearch/manticore:latest
-    ports:
-      - "9306:9306"
-      - "9308:9308"
+    restart: unless-stopped
+    # Keep Manticore on the Compose network only (app reaches it as host "manticore").
+    # Publish ports only if you need host-side SQL/HTTP access:
+    # ports:
+    #   - "9306:9306"
+    #   - "9308:9308"
     volumes:
       - manticore_data:/var/lib/manticore
+    expose:
+      - "9306"
+      - "9308"
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PUBLISH_PORT:-8081}:8081"
+    environment:
+      MANTICORE_HOST: manticore
+      MANTICORE_PORT: "9308"
+      APP_HOST: 0.0.0.0
+      APP_PORT: "8081"
+      FORCE_BOOTSTRAP: "${FORCE_BOOTSTRAP:-0}"
+    volumes:
+      - app_uploads:/app/public/images/uploads
+      - app_imports:/app/storage/imports
+      - app_logs:/app/storage/logs
+      - app_state:/app/storage/state
+    depends_on:
+      - manticore
+
 volumes:
   manticore_data:
+  app_uploads:
+  app_imports:
+  app_logs:
+  app_state:

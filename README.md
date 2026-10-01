@@ -6,66 +6,69 @@
 
 [Blogpost about this project](https://manticoresearch.com/blog/manticore-php-demo/)
 
-## Docker installation (recommended)
+## Docker installation
 
-**Option A: Makefile shortcuts**
-
-```bash
-cd <repo-root>
-make up
-cp app/.env.example app/.env
-make install
-make bootstrap
-make serve
-make serve-status
-make serve-stop
-make serve-restart
-```
-
-**Option B: shell commands (no Make)**
+Requirements: Docker and Docker Compose.
 
 ```bash
 cd <repo-root>
 docker compose up -d
-
-cp app/.env.example app/.env
-cd app
-composer install
-php bin/bootstrap-demo.php
-
-mkdir -p storage/logs
-nohup php -S 127.0.0.1:8081 -t public >> storage/logs/php-server.log 2>&1 &
-echo $! > storage/php-server.pid
 ```
 
-This repository's `compose.yaml` starts the Manticore service in Docker.  
-The PHP app itself is run via the built-in PHP server.
+That single command:
 
-`php bin/bootstrap-demo.php` recreates the table and loads demo records from fixtures.
+1. Starts Manticore Search
+2. Builds the PHP app image (Composer install included)
+3. Waits for Manticore to be ready
+4. Bootstraps the demo catalog on first start
+5. Serves the app on [http://localhost:8081/](http://localhost:8081/)
 
-### PHP server management
+Both services use `restart: unless-stopped`, so they come back after Docker or host restarts.
 
-`make serve` reads `APP_HOST` and `APP_PORT` from `app/.env` (defaults to `127.0.0.1:8081`), writes a PID file to `app/storage/php-server.pid`, and logs to `app/storage/logs/php-server.log`.
-
-Check status without Make:
+### Useful commands
 
 ```bash
-kill -0 "$(cat app/storage/php-server.pid)" && echo "running" || echo "not running"
-curl http://127.0.0.1:8081/
+# Status / logs
+docker compose ps
+docker compose logs -f app
+
+# Stop / start
+docker compose down
+docker compose up -d
+
+# Rebuild after code or dependency changes
+docker compose up -d --build
+
+# Re-run fixture bootstrap (wipes and reloads demo catalog data)
+FORCE_BOOTSTRAP=1 docker compose up -d --force-recreate app
 ```
 
-Stop without Make:
+### Custom publish port
+
+By default the app is published on host port `8081`. Override if needed:
 
 ```bash
-kill "$(cat app/storage/php-server.pid)"
-rm -f app/storage/php-server.pid
+APP_PUBLISH_PORT=25560 docker compose up -d
 ```
 
-Replace `127.0.0.1:8081` with the values from `app/.env` if you changed them.
+Manticore stays on the Compose network (reachable from the app as host `manticore`). To also expose Manticore on the host, uncomment the `ports` entries under `manticore` in `compose.yaml`.
 
+### Detect the app port
 
-## Running the demo locally
+```bash
+docker compose ps
+ss -tlnp | grep -E '8081|25560'
+curl -v http://127.0.0.1:8081/
+```
 
-To run the demo, open this URL in your browser:
+## Running the demo
+
+Open:
 
 - http://localhost:8081/
+
+Admin upload panel:
+
+- http://localhost:8081/admin/upload
+
+More application details (fixtures generation, admin reset, etc.) are in [`app/README.md`](./app/README.md).
