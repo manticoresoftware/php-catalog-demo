@@ -1,0 +1,56 @@
+.site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.62rem 1.25rem;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .site-header-left h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text, #182433);
+        }
+
+        .site-header-left span {
+            display: block;
+            margin-top: 0.1rem;
+            font-size: 0.75rem;
+            color: var(--muted, #66788f);
+        }
+
+        .site-header-left a {
+            text-decoration: none;
+            color: #879e2a;
+        }
+
+        .site-header-left a:hover {
+            text-decoration: underline;
+        }
+
+        .site-header-right {
+            flex-shrink: 0;
+        }
+
+        .site-header .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        .site-header .github-link:hover {
+            color: #111;
+        }
+
+        .site-header .github-link svg {
+            display: block;
+            flex-shrink: 0;
+        }

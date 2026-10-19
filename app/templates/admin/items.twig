@@ -22,6 +22,8 @@
             color: var(--text);
         }
 
+        {% include 'partials/site_header_styles.twig' %}
+
         main.shell {
             max-width: 1180px;
             margin: 0 auto;
@@ -394,6 +396,7 @@
     </style>
 </head>
 <body>
+{% include 'partials/site_header.twig' %}
 <main class="shell">
     <div class="topbar">
         <p class="brand">Manticore Catalog Demo</p>
