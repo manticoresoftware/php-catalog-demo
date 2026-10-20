@@ -53,6 +53,18 @@ APP_PUBLISH_PORT=25560 docker compose up -d
 
 Manticore stays on the Compose network (reachable from the app as host `manticore`). To also expose Manticore on the host, uncomment the `ports` entries under `manticore` in `compose.yaml`.
 
+### Public URL (SEO)
+
+Canonical links and the sitemap (`/sitemap`) use `APP_URL`. Set it on a public deployment, for example in a `.env` file next to `compose.yaml`:
+
+```bash
+APP_URL=https://catalog.manticoresearch.com
+```
+
+Without it, the origin is taken from the request (`Host` and `X-Forwarded-Proto`), which can be wrong behind a reverse proxy.
+
+Catalog URLs with query parameters (search, facets, sort, scroll) are marked `noindex` and canonicalize to `/`. Item pages canonicalize to `/items/{id}`.
+
 ### Detect the app port
 
 ```bash

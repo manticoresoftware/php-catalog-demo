@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ item.title }} · {{ app.name }}</title>
+    <link rel="canonical" href="{{ seo.canonical }}">
+    <meta name="robots" content="{{ seo.robots }}">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
@@ -389,7 +391,7 @@
     </div>
 
     <p class="similar-toggle">
-        <a href="?show_similar=1" data-show-similar-link>
+        <a href="?show_similar=1" rel="nofollow" data-show-similar-link>
             {{ show_similar and similar ? 'Hide similar games' : 'Show similar games' }}
         </a>
     </p>

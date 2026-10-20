@@ -24,6 +24,9 @@ class CatalogController
     private const HYBRID_MAX_MATCHES_MULTIPLIER = 3;
     private const SIMILAR_KNN_LIMIT = 1000;
     private const SIMILAR_RESULT_LIMIT = 5;
+    private const SITEMAP_BATCH_SIZE = 1000;
+    // Sitemap protocol limit per file.
+    private const SITEMAP_MAX_URLS = 50000;
     private const SAFE_SEARCH_ERROR = 'Search is temporarily unavailable. Please try again in a moment.';
     private const SAFE_AUTOCOMPLETE_ERROR = 'Suggestions are temporarily unavailable. Please try again later.';
 
@@ -187,6 +190,11 @@ class CatalogController
                 'port' => $this->settings['manticore']['port'],
             ],
             'menu' => $this->primaryNav('catalog'),
+            // Any query string is UI state (search, facets, sort, scroll), not a separate page.
+            'seo' => [
+                'canonical' => $this->publicBaseUrl($request) . '/',
+                'robots' => $params === [] ? 'index, follow' : 'noindex, follow',
+            ],
             'categories' => $categoryNav,
             'category_all_link' => $this->buildUrlWith($baseQuery, ['category' => null, 'page' => 1]),
             'tags' => $tagNav,
@@ -333,10 +341,80 @@ class CatalogController
                 'port' => $this->settings['manticore']['port'],
             ],
             'menu' => $this->primaryNav('catalog'),
+            'seo' => [
+                'canonical' => $this->publicBaseUrl($request) . '/items/' . $id,
+                'robots' => $showSimilar ? 'noindex, follow' : 'index, follow',
+            ],
             'item' => $this->formatHit($hit),
             'similar' => $similar,
             'show_similar' => $showSimilar,
         ]);
+    }
+
+    public function sitemap(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        try {
+            $items = $this->loadSitemapItems();
+        } catch (Throwable) {
+            // A partial sitemap would make crawlers drop item URLs; ask them to retry instead.
+            return $response->withStatus(503)->withHeader('Retry-After', '300');
+        }
+
+        $baseUrl = $this->publicBaseUrl($request);
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $xml .= '  <url><loc>' . htmlspecialchars($baseUrl . '/', ENT_XML1) . '</loc></url>' . "\n";
+        foreach ($items as $id => $updatedAt) {
+            $xml .= '  <url><loc>' . htmlspecialchars($baseUrl . '/items/' . $id, ENT_XML1) . '</loc>';
+            if ($updatedAt > 0) {
+                $xml .= '<lastmod>' . gmdate(DATE_ATOM, $updatedAt) . '</lastmod>';
+            }
+            $xml .= '</url>' . "\n";
+        }
+        $xml .= '</urlset>' . "\n";
+
+        $response->getBody()->write($xml);
+        return $response->withHeader('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
+    /**
+     * @return array<int,int> item id => updated_at timestamp
+     */
+    private function loadSitemapItems(): array
+    {
+        $items = [];
+        $scrollToken = null;
+        do {
+            $search = new Search($this->client);
+            $search->setTable($this->tableName)
+                ->search('*')
+                ->sort('id', 'asc')
+                ->limit(self::SITEMAP_BATCH_SIZE)
+                ->option('scroll', $scrollToken ?? true);
+            $body = $search->compile();
+            // Skip heavy fields such as description_vector.
+            $body['_source'] = ['updated_at'];
+
+            $resultSet = new ResultSet($this->client->search(['body' => $body], true));
+            $batchCount = 0;
+            foreach ($resultSet as $hit) {
+                $batchCount++;
+                $id = (int) $hit->getId();
+                if ($id > 0) {
+                    $items[$id] = (int) ($hit->getData()['updated_at'] ?? 0);
+                }
+            }
+
+            $nextScroll = $resultSet->getScroll();
+            $scrollToken = is_scalar($nextScroll) && (string) $nextScroll !== '' ? (string) $nextScroll : null;
+        } while (
+            $scrollToken !== null
+            && $batchCount === self::SITEMAP_BATCH_SIZE
+            && count($items) < self::SITEMAP_MAX_URLS - 1
+        );
+
+        // One slot is taken by the home page.
+        return array_slice($items, 0, self::SITEMAP_MAX_URLS - 1, true);
     }
 
     private function runSearch(
@@ -601,7 +679,27 @@ class CatalogController
     private function json(ResponseInterface $response, array $payload, int $status = 200): ResponseInterface
     {
         $response->getBody()->write((string) json_encode($payload, JSON_PRETTY_PRINT));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('X-Robots-Tag', 'noindex')
+            ->withStatus($status);
+    }
+
+    private function publicBaseUrl(ServerRequestInterface $request): string
+    {
+        $configured = (string) ($this->settings['app']['url'] ?? '');
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        $uri = $request->getUri()->withUserInfo('')->withPath('')->withQuery('')->withFragment('');
+        // Behind a TLS-terminating proxy the app sees plain http; trust the proxy's scheme.
+        $forwardedProto = strtolower(trim(explode(',', $request->getHeaderLine('X-Forwarded-Proto'))[0]));
+        if (in_array($forwardedProto, ['http', 'https'], true)) {
+            $uri = $uri->withScheme($forwardedProto)->withPort(null);
+        }
+
+        return rtrim((string) $uri, '/');
     }
 
     private function normalizeAutocompleteResponse(array $raw): array

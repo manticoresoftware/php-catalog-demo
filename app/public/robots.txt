@@ -1,0 +1,11 @@
+User-agent: *
+Disallow:
+# Parameter URLs (/?category=...), /admin/ and /api/ carry noindex
+# (meta robots or X-Robots-Tag). Crawlers must be able to fetch them to see it,
+# so they are not blocked yet. Once Search Console shows them dropped from
+# the index, uncomment these lines to stop crawling them altogether:
+# Disallow: /*?
+# Disallow: /admin/
+# Disallow: /api/
+
+Sitemap: https://catalog.manticoresearch.com/sitemap

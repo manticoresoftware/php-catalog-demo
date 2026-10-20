@@ -56,6 +56,7 @@ $app->get('/', [$catalogController, 'home']);
 $app->get('/items/{id}', [$catalogController, 'item']);
 $app->get('/api/search', [$catalogController, 'searchApi']);
 $app->get('/api/autocomplete', [$catalogController, 'autocompleteApi']);
+$app->get('/sitemap', [$catalogController, 'sitemap']);
 
 $app->group('/admin', function (RouteCollectorProxy $group) use ($uploadController) {
     $group->get('/upload', [$uploadController, 'show']);

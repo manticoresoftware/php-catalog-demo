@@ -5,6 +5,9 @@ return [
         'name' => 'Manticore Catalog Demo',
         'host' => getenv('APP_HOST') ?: '127.0.0.1',
         'port' => (int) (getenv('APP_PORT') ?: 8081),
+        // Public origin used for canonical links and the sitemap, e.g. https://catalog.example.com.
+        // When empty, it is derived from the incoming request.
+        'url' => rtrim((string) (getenv('APP_URL') ?: ''), '/'),
     ],
     'paths' => [
         'root' => dirname(__DIR__),
