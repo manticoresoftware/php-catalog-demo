@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ app.name }}</title>
+    <link rel="canonical" href="{{ seo.canonical }}">
+    <meta name="robots" content="{{ seo.robots }}">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
@@ -1175,6 +1177,7 @@
                         class="facet-clear{% if search.filters.category|length == 0 %} is-hidden{% endif %}"
                         data-facet-clear="category"
                         href="{{ category_all_link }}"
+                        rel="nofollow"
                     >Clear</a>
                 </div>
                 <div class="facet-search">
@@ -1184,7 +1187,7 @@
                 <div class="facet-list" role="list">
                     {% for option in categories %}
                         <div class="facet-row" role="listitem">
-                            <a class="facet-option" href="{{ option.href }}" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
+                            <a class="facet-option" href="{{ option.href }}" rel="nofollow" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
                                 <span class="facet-checkbox" aria-hidden="true"></span>
                                 <span class="facet-name">{{ option.label|replace({'A. ': '', 'A.': '', 'a. ': '', 'a.': ''}) }}</span>
                                 <span class="facet-count">({{ option.count }})</span>
@@ -1200,6 +1203,7 @@
                         class="facet-clear{% if search.filters.tag|length == 0 %} is-hidden{% endif %}"
                         data-facet-clear="tag"
                         href="{{ tag_all_link }}"
+                        rel="nofollow"
                     >Clear</a>
                 </div>
                 <div class="facet-search">
@@ -1209,7 +1213,7 @@
                 <div class="facet-list" role="list">
                     {% for option in tags %}
                         <div class="facet-row" role="listitem">
-                            <a class="facet-option" href="{{ option.href }}" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
+                            <a class="facet-option" href="{{ option.href }}" rel="nofollow" aria-current="{{ option.active ? 'page' : 'false' }}" data-facet-id="{{ option.id }}" data-facet-index="{{ loop.index0 }}">
                                 <span class="facet-checkbox" aria-hidden="true"></span>
                                 <span class="facet-name">{{ option.label|replace({'A. ': '', 'A.': '', 'a. ': '', 'a.': ''}) }}</span>
                                 <span class="facet-count">({{ option.count }})</span>
@@ -1325,7 +1329,7 @@
                 </div>
                 {% if search.links.next %}
                     <div class="show-more-wrap">
-                        <a class="show-more-link" data-show-more-link href="{{ search.links.next }}">Show more games</a>
+                        <a class="show-more-link" data-show-more-link href="{{ search.links.next }}" rel="nofollow">Show more games</a>
                     </div>
                 {% endif %}
             {% elseif has_any_search_constraints %}
